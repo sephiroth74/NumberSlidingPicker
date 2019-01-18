@@ -32,7 +32,11 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
+    implementation project(':xtooltip')
+
 //    implementation 'it.sephiroth.android.library.uigestures:uigesture-recognizer-kotlin:1.2.7'
+//    implementation 'com.github.sephiroth74:android-target-tooltip:v2.0.3'
+
     implementation 'com.github.sephiroth74:AndroidUIGestureRecognizer:v1.2.7'
 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
