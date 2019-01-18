@@ -34,10 +34,11 @@ class NumberPicker @JvmOverloads constructor(
 //            mContentView?.text = text
 
 
-            tooltip?.contentView?.findViewById<TextView>(android.R.id.text1)?.text = text
+            tooltip?.update(text)
         }
 
     private var mDownPosition = 0
+    private var mLastLocation: Float = 0f
 
     init {
         setBackgroundColor(Color.CYAN)
@@ -49,6 +50,7 @@ class NumberPicker @JvmOverloads constructor(
             when (it.state) {
                 UIGestureRecognizer.State.Began -> {
                     mDownPosition = it.downLocationY.toInt()
+                    mLastLocation = it.currentLocationY
                     startInteraction()
                 }
 
@@ -57,14 +59,12 @@ class NumberPicker @JvmOverloads constructor(
                 }
 
                 UIGestureRecognizer.State.Changed -> {
-                    val distance = it.currentLocationY - it.downLocationY
-                    Timber.v("number changing... $distance")
+                    val distance = (it.currentLocationY - mLastLocation) / 2
+                    mCurrent -= distance.toInt()
 
-                    if (it.currentLocationY < mDownPosition) {
-                        mCurrent += 1
-                    } else {
-                        mCurrent -= 1
-                    }
+                    tooltip?.offsetBy(0f, it.currentLocationY - mLastLocation)
+
+                    mLastLocation = it.currentLocationY
                 }
                 else -> {
                 }
@@ -81,13 +81,17 @@ class NumberPicker @JvmOverloads constructor(
 
 
     private var tooltip: Tooltip? = null
+    val mInitLocation = intArrayOf(0, 0)
 
     fun startInteraction() {
         Timber.i("startInteraction")
 
+        getLocationOnScreen(mInitLocation)
+        mInitLocation[1] += height / 2
+        mInitLocation[0] -= width / 2
 
         tooltip = Tooltip.Builder(context)
-            .anchor(this, 0, 0, true)
+            .anchor(this, -20, 0, false)
             .arrow(true)
             .closePolicy(ClosePolicy.TOUCH_NONE)
             .overlay(false)
