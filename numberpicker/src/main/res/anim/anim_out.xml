@@ -4,12 +4,5 @@
      android:interpolator="@android:interpolator/decelerate_quad"
      android:duration="@android:integer/config_shortAnimTime">
 
-    <scale android:fromXScale="1"
-           android:toXScale="1.3"
-           android:fromYScale="1"
-           android:toYScale="1.3"
-           android:pivotX="50%"
-           android:pivotY="50%"/>
-
     <alpha android:fromAlpha="1.0" android:toAlpha="0.0"/>
 </set>

@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <style name="Animation">
         <item name="android:windowEnterAnimation">@anim/anim_in</item>
         <item name="android:windowExitAnimation">@anim/anim_out</item>
     </style>
+
+    <style name="ToolTipStyle" parent="ToolTipLayoutDefaultStyle">
+        <item name="ttlm_animationStyle">@style/Animation</item>
+        <item name="ttlm_cornerRadius">10dp</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="NumberPickerStyle">
+        <item name="picker_min">-100</item>
+        <item name="picker_max">100</item>
+        <item name="picker_value">0</item>
+        <item name="picker_stepSize">1</item>
+        <item name="picker_orientation">horizontal</item>
+        <item name="picker_tracker">linear</item>
+
+    </style>
+
 </resources>
