@@ -1,15 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Animation">
-        <item name="android:windowEnterAnimation">@anim/anim_in</item>
+    <style name="NumberPickerStyle.AnimationHorizontal">
+        <item name="android:windowEnterAnimation">@anim/anim_in_right</item>
+        <item name="android:windowExitAnimation">@anim/anim_out</item>
+    </style>
+
+    <style name="NumberPickerStyle.AnimationVertical">
+        <item name="android:windowEnterAnimation">@anim/anim_in_bottom</item>
         <item name="android:windowExitAnimation">@anim/anim_out</item>
     </style>
 
     <style name="ToolTipStyle" parent="ToolTipLayoutDefaultStyle">
-        <item name="ttlm_animationStyle">@style/Animation</item>
+        <item name="ttlm_animationStyle">@style/NumberPickerStyle.AnimationHorizontal</item>
         <item name="ttlm_cornerRadius">10dp</item>
+        <item name="ttlm_textStyle">@style/NumberPickerStyle.ToolTipTextStyle</item>
+    </style>
+
+    <style name="NumberPickerStyle.ToolTipTextStyle" parent="ToolTipTextStyle">
         <item name="android:gravity">center</item>
+        <item name="android:lines">1</item>
     </style>
 
     <style name="NumberPickerStyle">
@@ -17,7 +27,7 @@
         <item name="picker_max">100</item>
         <item name="picker_value">0</item>
         <item name="picker_stepSize">1</item>
-        <item name="picker_orientation">horizontal</item>
+        <item name="picker_orientation">vertical</item>
         <item name="picker_tracker">linear</item>
 
     </style>

@@ -34,29 +34,35 @@ class NumberPicker @JvmOverloads constructor(
         value = newValue
     }
 
+    private var mLastLocationX: Float = 0f
     private var mLastLocationY: Float = 0f
 
     private val longGestureListener = { it: UIGestureRecognizer ->
         when {
             it.state == UIGestureRecognizer.State.Began -> {
                 tracker.begin(it.downLocationX, it.downLocationY)
-
                 mLastLocationY = it.downLocationY
+                mLastLocationX = it.downLocationX
                 startInteraction()
 
 
             }
             it.state == UIGestureRecognizer.State.Ended -> {
                 tracker.end()
-
                 endInteraction()
             }
             it.state == UIGestureRecognizer.State.Changed -> {
+
+                if (orientation == VERTICAL) {
+                    val diff = it.currentLocationY - mLastLocationY
+                    tooltip?.offsetBy(0F, diff)
+                } else {
+                    val diff = it.currentLocationX - mLastLocationX
+                    tooltip?.offsetBy(diff, 0F)
+                }
+
                 tracker.addMovement(it.currentLocationX, it.currentLocationY)
-
-                val diff = it.currentLocationY - mLastLocationY
-
-                tooltip?.offsetBy(0F, diff)
+                mLastLocationX = it.currentLocationX
                 mLastLocationY = it.currentLocationY
             }
         }
@@ -110,8 +116,6 @@ class NumberPicker @JvmOverloads constructor(
                     LinearTracker(this, maxDistance, orientation, callback)
                 }
             }
-
-
         } finally {
             array.recycle()
         }
@@ -128,6 +132,8 @@ class NumberPicker @JvmOverloads constructor(
         setGestureDelegate(delegate)
     }
 
+    val orientation: Int = data.orientation
+
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         delegate.isEnabled = enabled
@@ -141,14 +147,31 @@ class NumberPicker @JvmOverloads constructor(
         tooltip = Tooltip.Builder(context)
             .anchor(this, 0, 0, false)
             .styleId(R.style.ToolTipStyle)
-            .arrow(false)
+            .arrow(true)
             .closePolicy(ClosePolicy.TOUCH_NONE)
             .overlay(false)
             .showDuration(0)
-            .text(text.toString())
+            .text(minValue.toString())
+            .animationStyle(if (orientation == VERTICAL) R.style.NumberPickerStyle_AnimationHorizontal else R.style.NumberPickerStyle_AnimationVertical)
             .create()
 
-        tooltip?.show(this, Tooltip.Gravity.LEFT, false)
+        tooltip?.doOnPrepare { tooltip ->
+            tooltip.contentView?.let { contentView ->
+                val textView = contentView.findViewById<TextView>(android.R.id.text1)
+                textView.measure(0, 0)
+                textView.minWidth = textView.measuredWidth
+                textView.text = text.toString()
+//                tooltip.offsetBy(-contentView.measuredWidth.toFloat(), 0f)
+            }
+        }
+
+        tooltip?.doOnShown {
+            it.update(text.toString())
+        }
+
+        tooltip?.show(this, if (orientation == VERTICAL) Tooltip.Gravity.LEFT else Tooltip.Gravity.TOP, false)
+
+
     }
 
     private fun endInteraction() {
@@ -175,7 +198,7 @@ class NumberPicker @JvmOverloads constructor(
 }
 
 
-class Data(value: Int, minValue: Int, maxValue: Int, var stepSize: Int, orientation: Int) {
+class Data(value: Int, minValue: Int, maxValue: Int, var stepSize: Int, val orientation: Int) {
     var value: Int = value
         set(value) {
             field = max(minValue, min(maxValue, value))

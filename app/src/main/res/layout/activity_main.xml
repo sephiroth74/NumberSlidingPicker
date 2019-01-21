@@ -14,6 +14,8 @@
         android:inputType="none"
         android:lines="1"
         android:padding="8dp"
+        android:ems="3"
+        android:background="@android:color/holo_blue_light"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
