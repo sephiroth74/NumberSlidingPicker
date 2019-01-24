@@ -29,7 +29,18 @@
         <item name="picker_stepSize">1</item>
         <item name="picker_orientation">vertical</item>
         <item name="picker_tracker">linear</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="picker_arrowStyle">@style/NumberPicker.ArrowStyle</item>
+    </style>
 
+    <!-- final style -->
+
+    <style name="NumberPicker"/>
+
+
+    <style name="NumberPicker.ArrowStyle">
+        <item name="android:src">@drawable/arrow_up_selector</item>
+        <item name="android:background">@drawable/arrow_up_background</item>
     </style>
 
 </resources>

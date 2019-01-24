@@ -1,23 +1,39 @@
 package it.sephiroth.android.library.numberpicker
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
 import android.util.AttributeSet
+import android.view.Gravity
+import android.view.MotionEvent
+import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.view.ContextThemeWrapper
+import androidx.appcompat.widget.AppCompatImageButton
+import androidx.appcompat.widget.AppCompatTextView
+import io.reactivex.Observable
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 import it.sephiroth.android.library.uigestures.UIGestureRecognizer
 import it.sephiroth.android.library.uigestures.UIGestureRecognizerDelegate
 import it.sephiroth.android.library.uigestures.UILongPressGestureRecognizer
-import it.sephiroth.android.library.uigestures.setGestureDelegate
 import it.sephiroth.android.library.xtooltip.ClosePolicy
 import it.sephiroth.android.library.xtooltip.Tooltip
 import timber.log.Timber
+import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
 class NumberPicker @JvmOverloads constructor(
-        context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-                                            ) : TextView(context, attrs, defStyleAttr) {
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+) : LinearLayout(context, attrs, defStyleAttr) {
+
+    private lateinit var textView: TextView
+    private lateinit var upButton: AppCompatImageButton
+    private lateinit var downButton: AppCompatImageButton
 
     private val delegate = UIGestureRecognizerDelegate()
     private val longGesture: UILongPressGestureRecognizer
@@ -72,8 +88,8 @@ class NumberPicker @JvmOverloads constructor(
         get() = data.value
         set(value) {
             data.value = value
-            text = data.value.toString()
-            tooltip?.update(text)
+            textView.text = data.value.toString()
+//            tooltip?.update(text)
         }
 
     var minValue: Int
@@ -94,20 +110,23 @@ class NumberPicker @JvmOverloads constructor(
             data.stepSize = value
         }
 
+    private var arrowStyle: Int
+
     init {
+        Timber.i("init")
         val array = context.theme.obtainStyledAttributes(attrs, R.styleable.NumberPicker, 0, R.style.NumberPickerStyle)
 
         try {
             val maxValue = array.getInteger(R.styleable.NumberPicker_picker_max, 100)
             val minValue = array.getInteger(R.styleable.NumberPicker_picker_min, 0)
             val stepSize = array.getInteger(R.styleable.NumberPicker_picker_stepSize, 1)
-            val orientation = array.getInteger(R.styleable.NumberPicker_picker_orientation, VERTICAL)
+            val orientation = array.getInteger(R.styleable.NumberPicker_picker_orientation, LinearLayout.VERTICAL)
             val value = array.getInteger(R.styleable.NumberPicker_picker_value, 0)
+            arrowStyle = array.getResourceId(R.styleable.NumberPicker_picker_arrowStyle, 0)
 
             maxDistance = context.resources.getDimensionPixelSize(R.dimen.picker_distance_max)
 
             data = Data(value, minValue, maxValue, stepSize, orientation)
-            text = data.value.toString()
 
             val tracker_type = array.getInteger(R.styleable.NumberPicker_picker_tracker, TRACKER_LINEAR)
             tracker = when (tracker_type) {
@@ -116,6 +135,18 @@ class NumberPicker @JvmOverloads constructor(
                     LinearTracker(this, maxDistance, orientation, callback)
                 }
             }
+
+            inflateChildren()
+            textView.text = data.value.toString()
+
+//            upButton.setOnClickListener {
+//                this.value += stepSize
+//            }
+
+            downButton.setOnClickListener {
+                this.value -= stepSize
+            }
+
         } finally {
             array.recycle()
         }
@@ -129,16 +160,129 @@ class NumberPicker @JvmOverloads constructor(
 
         delegate.isEnabled = isEnabled
 
-        setGestureDelegate(delegate)
+        initializeButtonActions()
+
+//        setGestureDelegate(delegate)
     }
 
-    val orientation: Int = data.orientation
+    private fun inflateChildren() {
+        upButton = AppCompatImageButton(context)
+        upButton.setImageResource(R.drawable.arrow_up_selector)
+        upButton.setBackgroundResource(R.drawable.arrow_up_background)
+
+        var params = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        params.weight = 0f
+
+        addView(upButton, params)
+
+
+        textView =
+            AppCompatTextView(ContextThemeWrapper(context, android.R.style.Widget_Material_TextView), null, 0)
+        textView.gravity = Gravity.CENTER
+        textView.minEms = max(abs(maxValue).toString().length, abs(minValue).toString().length)
+
+        params = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT)
+        params.weight = 1f
+
+        addView(textView, params)
+
+        downButton = AppCompatImageButton(context)
+        downButton.setImageResource(R.drawable.arrow_up_selector)
+        downButton.setBackgroundResource(R.drawable.arrow_up_background)
+        downButton.rotation = 180f
+
+        params = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        params.weight = 0f
+
+        addView(downButton, params)
+
+
+    }
+
+    var buttonTimberInterval: Disposable? = null
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         delegate.isEnabled = enabled
     }
 
+    @SuppressLint("ClickableViewAccessibility")
+    private fun initializeButtonActions() {
+
+        upButton.setOnTouchListener { v, event ->
+            if (!isEnabled) {
+                false
+            } else {
+                val action = event.actionMasked
+                when (action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        value += stepSize
+                        upButton.isPressed = true
+                        buttonTimberInterval?.dispose()
+
+                        buttonTimberInterval = Observable.interval(
+                            ARROW_BUTTON_INITIAL_DELAY,
+                            ARROW_BUTTON_FRAME_DELAY,
+                            TimeUnit.MILLISECONDS,
+                            Schedulers.io()
+                        )
+                            .subscribeOn(AndroidSchedulers.mainThread())
+                            .subscribe {
+                                value += stepSize
+                            }
+                    }
+
+                    MotionEvent.ACTION_UP -> {
+                        upButton.isPressed = false
+
+                        buttonTimberInterval?.dispose()
+                        buttonTimberInterval = null
+
+
+                    }
+                }
+
+                true
+            }
+        }
+
+        downButton.setOnTouchListener { v, event ->
+            if (!isEnabled) {
+                false
+            } else {
+                val action = event.actionMasked
+                when (action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        value -= stepSize
+                        downButton.isPressed = true
+                        buttonTimberInterval?.dispose()
+
+                        buttonTimberInterval = Observable.interval(
+                            ARROW_BUTTON_INITIAL_DELAY,
+                            ARROW_BUTTON_FRAME_DELAY,
+                            TimeUnit.MILLISECONDS,
+                            Schedulers.io()
+                        )
+                            .subscribeOn(AndroidSchedulers.mainThread())
+                            .subscribe {
+                                value -= stepSize
+                            }
+                    }
+
+                    MotionEvent.ACTION_UP -> {
+                        downButton.isPressed = false
+
+                        buttonTimberInterval?.dispose()
+                        buttonTimberInterval = null
+
+
+                    }
+                }
+
+                true
+            }
+        }
+    }
 
     private fun startInteraction() {
         Timber.i("startInteraction")
@@ -160,13 +304,13 @@ class NumberPicker @JvmOverloads constructor(
                 val textView = contentView.findViewById<TextView>(android.R.id.text1)
                 textView.measure(0, 0)
                 textView.minWidth = textView.measuredWidth
-                textView.text = text.toString()
+//                textView.text = text.toString()
 //                tooltip.offsetBy(-contentView.measuredWidth.toFloat(), 0f)
             }
         }
 
         tooltip?.doOnShown {
-            it.update(text.toString())
+            //            it.update(text.toString())
         }
 
         tooltip?.show(this, if (orientation == VERTICAL) Tooltip.Gravity.LEFT else Tooltip.Gravity.TOP, false)
@@ -184,10 +328,10 @@ class NumberPicker @JvmOverloads constructor(
     }
 
     companion object {
-        const val HORIZONTAL = 0
-        const val VERTICAL = 1
 
         const val TRACKER_LINEAR = 0
+        const val ARROW_BUTTON_INITIAL_DELAY = 800L
+        const val ARROW_BUTTON_FRAME_DELAY = 16L
 
         init {
             if (BuildConfig.DEBUG) {
@@ -227,10 +371,12 @@ interface Tracker {
 }
 
 
-class LinearTracker(val numberPicker: NumberPicker,
-                    val maxDistance: Int,
-                    val orientation: Int,
-                    val callback: (Int) -> Unit) : Tracker {
+class LinearTracker(
+    val numberPicker: NumberPicker,
+    val maxDistance: Int,
+    val orientation: Int,
+    val callback: (Int) -> Unit
+) : Tracker {
 
     private var initialValue: Int = 0
 
@@ -248,7 +394,7 @@ class LinearTracker(val numberPicker: NumberPicker,
         loc[0] += numberPicker.width / 2
         loc[1] += numberPicker.height / 2
 
-        minDistance = if (orientation == NumberPicker.VERTICAL) {
+        minDistance = if (orientation == LinearLayout.VERTICAL) {
             min(maxDistance, min(loc[1], metrics.heightPixels - loc[1])).toFloat()
         } else {
             min(maxDistance, min(loc[0], metrics.widthPixels - loc[0])).toFloat()
@@ -260,7 +406,7 @@ class LinearTracker(val numberPicker: NumberPicker,
         Timber.i("begin($x, $y)")
         calcDistance()
 
-        downPosition = if (orientation == NumberPicker.VERTICAL) y else x
+        downPosition = if (orientation == LinearLayout.VERTICAL) y else x
         minPoint.set((-minDistance), (-minDistance))
         initialValue = numberPicker.value
 
@@ -269,7 +415,7 @@ class LinearTracker(val numberPicker: NumberPicker,
     override fun addMovement(x: Float, y: Float) {
         Timber.i("addMovement($x, $y)")
 
-        val currentPosition = if (orientation == NumberPicker.VERTICAL) y else x
+        val currentPosition = if (orientation == LinearLayout.VERTICAL) y else x
 
         val diff: Float
         val perc: Float
