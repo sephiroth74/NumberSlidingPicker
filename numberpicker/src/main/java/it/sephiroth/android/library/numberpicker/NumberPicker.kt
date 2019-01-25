@@ -69,6 +69,7 @@ class NumberPicker @JvmOverloads constructor(
     private val longGestureListener = { it: UIGestureRecognizer ->
         when {
             it.state == UIGestureRecognizer.State.Began -> {
+                requestFocus()
                 editText.isSelected = false
                 editText.clearFocus()
 
@@ -103,6 +104,7 @@ class NumberPicker @JvmOverloads constructor(
     }
 
     private val tapGestureListener = { _: UIGestureRecognizer ->
+        requestFocus()
         if (!editText.isFocused)
             editText.requestFocus()
     }
@@ -234,6 +236,7 @@ class NumberPicker @JvmOverloads constructor(
                 val action = event.actionMasked
                 when (action) {
                     MotionEvent.ACTION_DOWN -> {
+                        requestFocus()
                         setProgress(progress + stepSize)
                         editText.clearFocus()
                         upButton.requestFocus()
@@ -269,6 +272,7 @@ class NumberPicker @JvmOverloads constructor(
                 val action = event.actionMasked
                 when (action) {
                     MotionEvent.ACTION_DOWN -> {
+                        requestFocus()
                         setProgress(progress - stepSize)
                         editText.clearFocus()
                         downButton.requestFocus()
