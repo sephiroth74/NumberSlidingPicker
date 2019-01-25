@@ -52,9 +52,6 @@ class NumberPicker @JvmOverloads constructor(
         value = newValue
     }
 
-    private var mLastLocationX: Float = 0f
-    private var mLastLocationY: Float = 0f
-
     private var buttonTimberInterval: Disposable? = null
 
     private val longGestureListener = { it: UIGestureRecognizer ->
@@ -64,8 +61,6 @@ class NumberPicker @JvmOverloads constructor(
                 editText.clearFocus()
 
                 tracker.begin(it.downLocationX, it.downLocationY)
-                mLastLocationY = it.downLocationY
-                mLastLocationX = it.downLocationX
                 startInteraction()
             }
 
@@ -97,8 +92,6 @@ class NumberPicker @JvmOverloads constructor(
                 }
 
                 tracker.addMovement(it.currentLocationX, it.currentLocationY)
-                mLastLocationX = it.currentLocationX
-                mLastLocationY = it.currentLocationY
             }
         }
     }

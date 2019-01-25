@@ -1,5 +1,5 @@
 include ':app'
 include ':numberpicker'
-include ':xtooltip'
 
-project(':xtooltip').projectDir = file('../android-target-tooltip/xtooltip')
+//include ':xtooltip'
+//project(':xtooltip').projectDir = file('../android-target-tooltip/xtooltip')
