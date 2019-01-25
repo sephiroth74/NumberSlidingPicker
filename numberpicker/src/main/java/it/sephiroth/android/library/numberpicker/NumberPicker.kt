@@ -3,22 +3,22 @@ package it.sephiroth.android.library.numberpicker
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
+import android.graphics.drawable.GradientDrawable
+import android.text.InputType
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatImageButton
-import androidx.appcompat.widget.AppCompatTextView
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import it.sephiroth.android.library.uigestures.UIGestureRecognizer
-import it.sephiroth.android.library.uigestures.UIGestureRecognizerDelegate
-import it.sephiroth.android.library.uigestures.UILongPressGestureRecognizer
+import it.sephiroth.android.library.uigestures.*
 import it.sephiroth.android.library.xtooltip.ClosePolicy
 import it.sephiroth.android.library.xtooltip.Tooltip
 import timber.log.Timber
@@ -28,12 +28,13 @@ import kotlin.math.max
 import kotlin.math.min
 
 class NumberPicker @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
+        context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
-    private lateinit var textView: TextView
+    private lateinit var editText: TextView
     private lateinit var upButton: AppCompatImageButton
     private lateinit var downButton: AppCompatImageButton
+    private var boxBackground: GradientDrawable? = null
 
     private val delegate = UIGestureRecognizerDelegate()
     private val longGesture: UILongPressGestureRecognizer
@@ -44,7 +45,7 @@ class NumberPicker @JvmOverloads constructor(
 
     private var maxDistance: Int
 
-    internal val data: Data
+    internal lateinit var data: Data
 
     private var callback = { newValue: Int ->
         value = newValue
@@ -53,9 +54,12 @@ class NumberPicker @JvmOverloads constructor(
     private var mLastLocationX: Float = 0f
     private var mLastLocationY: Float = 0f
 
+    private var buttonTimberInterval: Disposable? = null
+
     private val longGestureListener = { it: UIGestureRecognizer ->
         when {
             it.state == UIGestureRecognizer.State.Began -> {
+                editText.clearFocus()
                 tracker.begin(it.downLocationX, it.downLocationY)
                 mLastLocationY = it.downLocationY
                 mLastLocationX = it.downLocationX
@@ -69,7 +73,7 @@ class NumberPicker @JvmOverloads constructor(
             }
             it.state == UIGestureRecognizer.State.Changed -> {
 
-                if (orientation == VERTICAL) {
+                if (data.orientation == VERTICAL) {
                     val diff = it.currentLocationY - mLastLocationY
                     tooltip?.offsetBy(0F, diff)
                 } else {
@@ -88,8 +92,8 @@ class NumberPicker @JvmOverloads constructor(
         get() = data.value
         set(value) {
             data.value = value
-            textView.text = data.value.toString()
-//            tooltip?.update(text)
+            editText.text = data.value.toString()
+            tooltip?.update(data.value.toString())
         }
 
     var minValue: Int
@@ -114,8 +118,11 @@ class NumberPicker @JvmOverloads constructor(
 
     init {
         Timber.i("init")
-        val array = context.theme.obtainStyledAttributes(attrs, R.styleable.NumberPicker, 0, R.style.NumberPickerStyle)
 
+        setWillNotDraw(false)
+        gravity = Gravity.CENTER
+
+        val array = context.theme.obtainStyledAttributes(attrs, R.styleable.NumberPicker, 0, R.style.NumberPickerStyle)
         try {
             val maxValue = array.getInteger(R.styleable.NumberPicker_picker_max, 100)
             val minValue = array.getInteger(R.styleable.NumberPicker_picker_min, 0)
@@ -135,17 +142,10 @@ class NumberPicker @JvmOverloads constructor(
                     LinearTracker(this, maxDistance, orientation, callback)
                 }
             }
-
             inflateChildren()
-            textView.text = data.value.toString()
 
-//            upButton.setOnClickListener {
-//                this.value += stepSize
-//            }
+            editText.text = data.value.toString()
 
-            downButton.setOnClickListener {
-                this.value -= stepSize
-            }
 
         } finally {
             array.recycle()
@@ -156,50 +156,66 @@ class NumberPicker @JvmOverloads constructor(
         longGesture.longPressTimeout = 200
         longGesture.actionListener = longGestureListener
 
+        val tap = UITapGestureRecognizer(context)
+
+
+        delegate.addGestureRecognizer(tap)
         delegate.addGestureRecognizer(longGesture)
+
+        tap.actionListener = { it: UIGestureRecognizer ->
+            editText.requestFocus()
+        }
 
         delegate.isEnabled = isEnabled
 
         initializeButtonActions()
 
-//        setGestureDelegate(delegate)
+        editText.setGestureDelegate(delegate)
     }
+
 
     private fun inflateChildren() {
         upButton = AppCompatImageButton(context)
         upButton.setImageResource(R.drawable.arrow_up_selector)
         upButton.setBackgroundResource(R.drawable.arrow_up_background)
 
-        var params = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        params.weight = 0f
+        if (data.orientation == HORIZONTAL) {
+            upButton.rotation = 90f
+        }
 
-        addView(upButton, params)
+        editText =
+                EditText(ContextThemeWrapper(context, android.R.style.Widget_Material_EditText), null, 0)
+        editText.gravity = Gravity.CENTER
+        editText.inputType = InputType.TYPE_CLASS_NUMBER
 
-
-        textView =
-            AppCompatTextView(ContextThemeWrapper(context, android.R.style.Widget_Material_TextView), null, 0)
-        textView.gravity = Gravity.CENTER
-        textView.minEms = max(abs(maxValue).toString().length, abs(minValue).toString().length)
-
-        params = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT)
-        params.weight = 1f
-
-        addView(textView, params)
+        editText.setLines(1)
+        editText.setEms(max(abs(maxValue).toString().length, abs(minValue).toString().length))
 
         downButton = AppCompatImageButton(context)
         downButton.setImageResource(R.drawable.arrow_up_selector)
         downButton.setBackgroundResource(R.drawable.arrow_up_background)
-        downButton.rotation = 180f
+        downButton.rotation = if (data.orientation == VERTICAL) 180f else -90f
 
-        params = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        params.weight = 0f
+        val params1 = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        params1.weight = 0f
 
-        addView(downButton, params)
+        val params2 = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT)
+        params2.weight = 1f
 
+        val params3 = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        params3.weight = 0f
 
+        if (data.orientation == VERTICAL) {
+            addView(upButton, params1)
+            addView(editText, params2)
+            addView(downButton, params3)
+        } else {
+            addView(downButton, params3)
+            addView(editText, params2)
+            addView(upButton, params1)
+        }
     }
 
-    var buttonTimberInterval: Disposable? = null
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
@@ -217,28 +233,26 @@ class NumberPicker @JvmOverloads constructor(
                 when (action) {
                     MotionEvent.ACTION_DOWN -> {
                         value += stepSize
+                        editText.clearFocus()
+                        upButton.requestFocus()
                         upButton.isPressed = true
                         buttonTimberInterval?.dispose()
 
                         buttonTimberInterval = Observable.interval(
-                            ARROW_BUTTON_INITIAL_DELAY,
-                            ARROW_BUTTON_FRAME_DELAY,
-                            TimeUnit.MILLISECONDS,
-                            Schedulers.io()
-                        )
-                            .subscribeOn(AndroidSchedulers.mainThread())
-                            .subscribe {
-                                value += stepSize
-                            }
+                                ARROW_BUTTON_INITIAL_DELAY,
+                                ARROW_BUTTON_FRAME_DELAY,
+                                TimeUnit.MILLISECONDS,
+                                Schedulers.io())
+                                .subscribeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    value += stepSize
+                                }
                     }
 
                     MotionEvent.ACTION_UP -> {
                         upButton.isPressed = false
-
                         buttonTimberInterval?.dispose()
                         buttonTimberInterval = null
-
-
                     }
                 }
 
@@ -254,19 +268,20 @@ class NumberPicker @JvmOverloads constructor(
                 when (action) {
                     MotionEvent.ACTION_DOWN -> {
                         value -= stepSize
+                        editText.clearFocus()
+                        downButton.requestFocus()
                         downButton.isPressed = true
                         buttonTimberInterval?.dispose()
 
                         buttonTimberInterval = Observable.interval(
-                            ARROW_BUTTON_INITIAL_DELAY,
-                            ARROW_BUTTON_FRAME_DELAY,
-                            TimeUnit.MILLISECONDS,
-                            Schedulers.io()
-                        )
-                            .subscribeOn(AndroidSchedulers.mainThread())
-                            .subscribe {
-                                value -= stepSize
-                            }
+                                ARROW_BUTTON_INITIAL_DELAY,
+                                ARROW_BUTTON_FRAME_DELAY,
+                                TimeUnit.MILLISECONDS,
+                                Schedulers.io())
+                                .subscribeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    value -= stepSize
+                                }
                     }
 
                     MotionEvent.ACTION_UP -> {
@@ -289,22 +304,22 @@ class NumberPicker @JvmOverloads constructor(
         animate().alpha(0.5f).start()
 
         tooltip = Tooltip.Builder(context)
-            .anchor(this, 0, 0, false)
-            .styleId(R.style.ToolTipStyle)
-            .arrow(true)
-            .closePolicy(ClosePolicy.TOUCH_NONE)
-            .overlay(false)
-            .showDuration(0)
-            .text(minValue.toString())
-            .animationStyle(if (orientation == VERTICAL) R.style.NumberPickerStyle_AnimationHorizontal else R.style.NumberPickerStyle_AnimationVertical)
-            .create()
+                .anchor(editText, 0, 0, false)
+                .styleId(R.style.ToolTipStyle)
+                .arrow(true)
+                .closePolicy(ClosePolicy.TOUCH_NONE)
+                .overlay(false)
+                .showDuration(0)
+                .text(minValue.toString())
+                .animationStyle(if (orientation == VERTICAL) R.style.NumberPickerStyle_AnimationHorizontal else R.style.NumberPickerStyle_AnimationVertical)
+                .create()
 
         tooltip?.doOnPrepare { tooltip ->
             tooltip.contentView?.let { contentView ->
                 val textView = contentView.findViewById<TextView>(android.R.id.text1)
                 textView.measure(0, 0)
                 textView.minWidth = textView.measuredWidth
-//                textView.text = text.toString()
+//                editText.text = text.toString()
 //                tooltip.offsetBy(-contentView.measuredWidth.toFloat(), 0f)
             }
         }
@@ -313,7 +328,7 @@ class NumberPicker @JvmOverloads constructor(
             //            it.update(text.toString())
         }
 
-        tooltip?.show(this, if (orientation == VERTICAL) Tooltip.Gravity.LEFT else Tooltip.Gravity.TOP, false)
+        tooltip?.show(this, if (data.orientation == VERTICAL) Tooltip.Gravity.LEFT else Tooltip.Gravity.TOP, false)
 
 
     }
@@ -372,10 +387,10 @@ interface Tracker {
 
 
 class LinearTracker(
-    val numberPicker: NumberPicker,
-    val maxDistance: Int,
-    val orientation: Int,
-    val callback: (Int) -> Unit
+        val numberPicker: NumberPicker,
+        val maxDistance: Int,
+        val orientation: Int,
+        val callback: (Int) -> Unit
 ) : Tracker {
 
     private var initialValue: Int = 0

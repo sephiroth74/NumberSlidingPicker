@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android" android:constantSize="true"
-          android:enterFadeDuration="@android:integer/config_shortAnimTime"
-          android:exitFadeDuration="@android:integer/config_shortAnimTime">
+    android:enterFadeDuration="@android:integer/config_shortAnimTime"
+    android:exitFadeDuration="@android:integer/config_shortAnimTime">
 
-    <item android:state_pressed="true" android:drawable="@drawable/round_keyboard_arrow_up_black_24">
+    <item android:state_pressed="true">
+        <bitmap android:src="@drawable/round_keyboard_arrow_up_black_24" android:tint="?attr/colorControlActivated" />
     </item>
 
     <item>
-        <bitmap android:src="@drawable/round_keyboard_arrow_up_black_24"
-                android:tint="?attr/colorControlNormal"/>
+        <bitmap android:src="@drawable/round_keyboard_arrow_up_black_24" android:tint="?attr/colorControlNormal" />
     </item>
 </selector>
