@@ -10,6 +10,8 @@ before_script:
 android:
   components:
     - tools
+    - tools
+    - build-tools-28.0.3
     - platform-tools
 
 notifications:
