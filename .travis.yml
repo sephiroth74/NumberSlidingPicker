@@ -17,7 +17,6 @@ before_script:
 before_install:
   - yes | sdkmanager "platforms;android-28"
 
-
 notifications:
     email:
         - alessandro.crugnola@gmail.com
@@ -29,7 +28,7 @@ install:
     - chmod +x ./gradlew; ls -l gradlew; ./gradlew wrapper -v
 
 script:
-  - ./gradlew clean build lint assemble
+  - ./gradlew clean build assemble
 
 cache:
   directories:
