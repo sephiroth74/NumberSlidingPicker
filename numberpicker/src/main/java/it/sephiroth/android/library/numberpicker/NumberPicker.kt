@@ -109,6 +109,7 @@ class NumberPicker @JvmOverloads constructor(
             editText.requestFocus()
     }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun setProgress(value: Int, fromUser: Boolean = true) {
         if (value != data.value) {
             data.value = value
@@ -304,7 +305,7 @@ class NumberPicker @JvmOverloads constructor(
             }
         }
 
-        editText.doOnTextChanged { text, start, count, after ->
+        editText.doOnTextChanged { text, _, _, _ ->
             if (!text.isNullOrEmpty()) {
                 try {
                     this.setProgress(Integer.valueOf(text.toString()))
@@ -314,7 +315,7 @@ class NumberPicker @JvmOverloads constructor(
             }
         }
 
-        editText.setOnFocusChangeListener { v, hasFocus ->
+        editText.setOnFocusChangeListener { _, hasFocus ->
             setBackgroundFocused(hasFocus)
 
             if (!hasFocus) {
@@ -437,13 +438,15 @@ class Data(value: Int, minValue: Int, maxValue: Int, var stepSize: Int, val orie
 
 internal abstract class Tracker(
         val numberPicker: NumberPicker,
-        val maxDistance: Int,
+        private val maxDistance: Int,
         val orientation: Int,
         val callback: (Int) -> Unit) {
 
     internal var started: Boolean = false
     internal var initialValue: Int = 0
     internal var downPosition: Float = 0f
+
+    @Suppress("MemberVisibilityCanBePrivate")
     internal var minPoint = PointF(0f, 0f)
 
     open fun begin(x: Float, y: Float) {
@@ -465,7 +468,7 @@ internal abstract class Tracker(
 
     var minDistance: Float = 0f
 
-    internal fun calcDistance() {
+    private fun calcDistance() {
         Timber.i("maxDistance: $maxDistance")
 
         val loc = intArrayOf(0, 0)
