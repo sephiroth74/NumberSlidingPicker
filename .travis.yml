@@ -40,6 +40,7 @@ install:
     # Ensure Gradle wrapper is executable, download wrapper and show version
     - chmod +x ./gradlew; ls -l gradlew; ./gradlew wrapper -v
 
+    # Download and show android dependencies
     - ./gradlew androidDependencies
 
 script:
