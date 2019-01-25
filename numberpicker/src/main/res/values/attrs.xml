@@ -13,6 +13,7 @@
 
         <attr name="picker_tracker" format="enum">
             <enum name="linear" value="0" />
+            <enum name="exponential" value="1" />
         </attr>
 
         <attr name="picker_orientation" format="enum">

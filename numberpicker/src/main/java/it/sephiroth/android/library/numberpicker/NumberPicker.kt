@@ -3,6 +3,7 @@ package it.sephiroth.android.library.numberpicker
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
+import android.os.Handler
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.MotionEvent
@@ -161,6 +162,7 @@ class NumberPicker @JvmOverloads constructor(
             val tracker_type = array.getInteger(R.styleable.NumberPicker_picker_tracker, TRACKER_LINEAR)
             tracker = when (tracker_type) {
                 TRACKER_LINEAR -> LinearTracker(this, maxDistance, orientation, callback)
+                TRACKER_EXPONENTIAL -> ExponentialTracker(this, maxDistance, orientation, callback)
                 else -> {
                     LinearTracker(this, maxDistance, orientation, callback)
                 }
@@ -395,6 +397,8 @@ class NumberPicker @JvmOverloads constructor(
     companion object {
 
         const val TRACKER_LINEAR = 0
+        const val TRACKER_EXPONENTIAL = 1
+
         const val ARROW_BUTTON_INITIAL_DELAY = 800L
         const val ARROW_BUTTON_FRAME_DELAY = 16L
         const val LONG_TAP_TIMEOUT = 300L
@@ -430,29 +434,37 @@ class Data(value: Int, minValue: Int, maxValue: Int, var stepSize: Int, val orie
 
 }
 
-interface Tracker {
-    fun begin(x: Float, y: Float)
-    fun addMovement(x: Float, y: Float)
-    fun end()
-    var minDistance: Float
-}
-
-
-class LinearTracker(
+internal abstract class Tracker(
         val numberPicker: NumberPicker,
         val maxDistance: Int,
         val orientation: Int,
-        val callback: (Int) -> Unit
-) : Tracker {
+        val callback: (Int) -> Unit) {
 
-    private var initialValue: Int = 0
+    internal var started: Boolean = false
+    internal var initialValue: Int = 0
+    internal var downPosition: Float = 0f
+    internal var minPoint = PointF(0f, 0f)
 
-    override var minDistance: Float = 0f
-    var downPosition: Float = 0f
+    open fun begin(x: Float, y: Float) {
+        Timber.i("begin($x, $y)")
+        calcDistance()
 
-    var minPoint = PointF(0f, 0f)
+        downPosition = if (orientation == LinearLayout.VERTICAL) -y else x
+        minPoint.set((-minDistance), (-minDistance))
+        initialValue = numberPicker.value
+        started = true
+    }
 
-    fun calcDistance() {
+    abstract fun addMovement(x: Float, y: Float)
+
+    open fun end() {
+        Timber.i("end()")
+        started = false
+    }
+
+    var minDistance: Float = 0f
+
+    internal fun calcDistance() {
         Timber.i("maxDistance: $maxDistance")
 
         val loc = intArrayOf(0, 0)
@@ -467,17 +479,76 @@ class LinearTracker(
             min(maxDistance, min(loc[0], metrics.widthPixels - loc[0])).toFloat()
         }
     }
+}
 
+internal class ExponentialTracker(
+        numberPicker: NumberPicker,
+        maxDistance: Int,
+        orientation: Int,
+        callback: (Int) -> Unit) : Tracker(numberPicker, maxDistance, orientation, callback) {
+
+    private var time: Long = 1000L
+    private var direction: Int = 0
+
+    private val handler = Handler()
+
+    private var runnable: Runnable = object : Runnable {
+        override fun run() {
+            if (!started) return
+
+            if (direction > 0)
+                callback.invoke(numberPicker.value + numberPicker.stepSize)
+            else if (direction < 0)
+                callback.invoke(numberPicker.value - numberPicker.stepSize)
+
+            if (started)
+                handler.postDelayed(this, time)
+        }
+    }
 
     override fun begin(x: Float, y: Float) {
-        Timber.i("begin($x, $y)")
-        calcDistance()
-
-        downPosition = if (orientation == LinearLayout.VERTICAL) y else x
-        minPoint.set((-minDistance), (-minDistance))
-        initialValue = numberPicker.value
-
+        super.begin(x, y)
+        handler.post(runnable)
     }
+
+    override fun addMovement(x: Float, y: Float) {
+        Timber.i("addMovement($x, $y)")
+
+        val currentPosition = if (orientation == LinearLayout.VERTICAL) -y else x
+        val diff: Float
+        val perc: Float
+
+        diff = max(-minDistance, min(currentPosition - downPosition, minDistance))
+        perc = (diff / minDistance)
+
+        direction = when {
+            perc > 0 -> 1
+            perc < 0 -> -1
+            else -> 0
+        }
+
+        time = (MAX_TIME_DELAY - ((MAX_TIME_DELAY - MIN_TIME_DELAY).toFloat() * abs(perc))).toLong()
+    }
+
+    override fun end() {
+        super.end()
+        handler.removeCallbacks(runnable)
+    }
+
+    companion object {
+        const val MAX_TIME_DELAY = 200L
+        const val MIN_TIME_DELAY = 16L
+    }
+
+
+}
+
+internal class LinearTracker(
+        numberPicker: NumberPicker,
+        maxDistance: Int,
+        orientation: Int,
+        callback: (Int) -> Unit) : Tracker(numberPicker, maxDistance, orientation, callback) {
+
 
     override fun addMovement(x: Float, y: Float) {
         Timber.i("addMovement($x, $y)")
@@ -509,10 +580,4 @@ class LinearTracker(
 
         callback.invoke(finalValue)
     }
-
-    override fun end() {
-        Timber.i("end")
-    }
-
-
 }

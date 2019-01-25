@@ -4,6 +4,7 @@
     <!-- final style -->
 
     <style name="NumberPicker">
+        <item name="picker_tracker">exponential</item>
         <item name="picker_editTextStyle">@style/NumberPicker.EditTextStyle</item>
         <item name="picker_tooltipStyle">@style/NumberPicker.ToolTipStyle</item>
         <item name="android:paddingLeft">8dp</item>
@@ -37,7 +38,7 @@
         <item name="picker_value">0</item>
         <item name="picker_stepSize">1</item>
         <item name="picker_orientation">vertical</item>
-        <item name="picker_tracker">linear</item>
+
         <item name="picker_arrowStyle">@style/NumberPicker.ArrowStyle</item>
         <item name="android:background">@drawable/mtrl_background_filled</item>
     </style>
@@ -52,7 +53,6 @@
         <item name="picker_value">0</item>
         <item name="picker_stepSize">1</item>
         <item name="picker_orientation">vertical</item>
-        <item name="picker_tracker">linear</item>
         <item name="picker_arrowStyle">@style/NumberPicker.ArrowStyle</item>
         <item name="android:background">@drawable/mtrl_background_outlined</item>
     </style>
@@ -67,7 +67,6 @@
         <item name="picker_value">0</item>
         <item name="picker_stepSize">1</item>
         <item name="picker_orientation">vertical</item>
-        <item name="picker_tracker">linear</item>
         <item name="picker_arrowStyle">@style/NumberPicker.ArrowStyle</item>
         <item name="android:background">@null</item>
     </style>
