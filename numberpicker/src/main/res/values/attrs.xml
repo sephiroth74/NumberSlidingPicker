@@ -3,24 +3,26 @@
 
 
     <declare-styleable name="NumberPicker">
-        <attr name="picker_value" format="integer"/>
-        <attr name="picker_stepSize" format="integer"/>
-        <attr name="picker_min" format="integer"/>
-        <attr name="picker_max" format="integer"/>
+        <attr name="picker_value" format="integer" />
+        <attr name="picker_stepSize" format="integer" />
+        <attr name="picker_min" format="integer" />
+        <attr name="picker_max" format="integer" />
         <attr name="picker_arrowStyle" format="reference" />
 
         <attr name="picker_tracker" format="enum">
-            <enum name="linear" value="0"/>
+            <enum name="linear" value="0" />
         </attr>
 
         <attr name="picker_orientation" format="enum">
-            <enum name="horizontal" value="0"/>
-            <enum name="vertical" value="1"/>
+            <enum name="horizontal" value="0" />
+            <enum name="vertical" value="1" />
         </attr>
+
+        <attr name="android:background" />
 
 
     </declare-styleable>
 
-    <attr name="pickerStyle" format="reference"/>
+    <attr name="pickerStyle" format="reference" />
 
 </resources>

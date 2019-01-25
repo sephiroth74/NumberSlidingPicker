@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <item>
+        <shape android:shape="rectangle">
+            <corners
+                android:radius="@dimen/mtrl_textinput_box_corner_radius_medium"
+                tools:ignore="PrivateResource" />
+            <solid
+                android:color="@color/mtrl_textinput_filled_box_default_background_color"
+                tools:ignore="PrivateResource" />
+        </shape>
+    </item>
+
+</layer-list>

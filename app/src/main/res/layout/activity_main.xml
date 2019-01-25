@@ -17,7 +17,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:picker_max="100"
         app:picker_min="-100"
-        app:picker_orientation="horizontal"
+        app:picker_orientation="vertical"
         app:picker_value="20" />
 
     <com.google.android.material.textfield.TextInputLayout
@@ -40,44 +40,17 @@
             android:layout_height="wrap_content" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <LinearLayout
+    <CheckBox
+        android:id="@+id/checkBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
+        android:layout_marginBottom="24dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:text="Checkbox 100"
         app:layout_constraintBottom_toTopOf="@+id/numberPicker"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintStart_toStartOf="parent" />
 
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/button1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:background="@drawable/arrow_up_background"
-            android:src="@drawable/arrow_up_selector" />
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:text="TextView" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/button2"
-            style="@style/NumberPicker.ArrowStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="0"
-            android:scaleY="-1" />
-    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

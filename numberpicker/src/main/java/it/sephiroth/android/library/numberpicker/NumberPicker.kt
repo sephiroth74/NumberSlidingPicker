@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
 import android.graphics.drawable.GradientDrawable
-import android.text.InputType
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.MotionEvent
@@ -14,6 +13,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatImageButton
+import androidx.core.widget.doOnTextChanged
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -26,18 +26,21 @@ import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.sin
 
 class NumberPicker @JvmOverloads constructor(
         context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr) {
 
-    private lateinit var editText: TextView
+    private lateinit var editText: EditText
     private lateinit var upButton: AppCompatImageButton
     private lateinit var downButton: AppCompatImageButton
     private var boxBackground: GradientDrawable? = null
 
     private val delegate = UIGestureRecognizerDelegate()
-    private val longGesture: UILongPressGestureRecognizer
+    private lateinit var longGesture: UILongPressGestureRecognizer
+    private lateinit var tapGesture: UITapGestureRecognizer
+
     private val initLocation = intArrayOf(0, 0)
 
     private var tooltip: Tooltip? = null
@@ -59,26 +62,40 @@ class NumberPicker @JvmOverloads constructor(
     private val longGestureListener = { it: UIGestureRecognizer ->
         when {
             it.state == UIGestureRecognizer.State.Began -> {
+                editText.isSelected = false
                 editText.clearFocus()
+
                 tracker.begin(it.downLocationX, it.downLocationY)
                 mLastLocationY = it.downLocationY
                 mLastLocationX = it.downLocationX
                 startInteraction()
-
-
             }
+
             it.state == UIGestureRecognizer.State.Ended -> {
                 tracker.end()
                 endInteraction()
             }
+
             it.state == UIGestureRecognizer.State.Changed -> {
 
-                if (data.orientation == VERTICAL) {
-                    val diff = it.currentLocationY - mLastLocationY
-                    tooltip?.offsetBy(0F, diff)
-                } else {
-                    val diff = it.currentLocationX - mLastLocationX
-                    tooltip?.offsetBy(diff, 0F)
+                when (data.orientation) {
+                    VERTICAL -> {
+                        var diff = it.currentLocationY - it.downLocationY
+                        if (diff > tracker.minDistance) {
+                            diff = tracker.minDistance
+                        } else if (diff < -tracker.minDistance) {
+                            diff = -tracker.minDistance
+                        }
+
+                        val final = diff / tracker.minDistance
+                        val final2 = sin(final * Math.PI / 2).toFloat()
+                        tooltip?.offsetTo(tooltip!!.offsetX, final2 / 2 * tracker.minDistance)
+                    }
+
+                    HORIZONTAL -> {
+                        val diff = it.currentLocationX - it.downLocationX
+                        tooltip?.offsetTo(diff, tooltip!!.offsetY)
+                    }
                 }
 
                 tracker.addMovement(it.currentLocationX, it.currentLocationY)
@@ -88,12 +105,21 @@ class NumberPicker @JvmOverloads constructor(
         }
     }
 
+    private val tapGestureListener = { it: UIGestureRecognizer ->
+        if (!editText.isFocused)
+            editText.requestFocus()
+    }
+
     var value: Int
         get() = data.value
         set(value) {
-            data.value = value
-            editText.text = data.value.toString()
-            tooltip?.update(data.value.toString())
+            if (value != data.value) {
+                data.value = value
+                tooltip?.update(data.value.toString())
+
+                if (editText.text.toString() != data.value.toString())
+                    editText.setText(data.value.toString())
+            }
         }
 
     var minValue: Int
@@ -130,6 +156,10 @@ class NumberPicker @JvmOverloads constructor(
             val orientation = array.getInteger(R.styleable.NumberPicker_picker_orientation, LinearLayout.VERTICAL)
             val value = array.getInteger(R.styleable.NumberPicker_picker_value, 0)
             arrowStyle = array.getResourceId(R.styleable.NumberPicker_picker_arrowStyle, 0)
+            val d = array.getDrawable(R.styleable.NumberPicker_android_background)
+            Timber.d("background = $d")
+
+            background = d
 
             maxDistance = context.resources.getDimensionPixelSize(R.dimen.picker_distance_max)
 
@@ -144,39 +174,21 @@ class NumberPicker @JvmOverloads constructor(
             }
             inflateChildren()
 
-            editText.text = data.value.toString()
+            editText.setText(data.value.toString())
 
 
         } finally {
             array.recycle()
         }
 
-
-        longGesture = UILongPressGestureRecognizer(context)
-        longGesture.longPressTimeout = 200
-        longGesture.actionListener = longGestureListener
-
-        val tap = UITapGestureRecognizer(context)
-
-
-        delegate.addGestureRecognizer(tap)
-        delegate.addGestureRecognizer(longGesture)
-
-        tap.actionListener = { it: UIGestureRecognizer ->
-            editText.requestFocus()
-        }
-
-        delegate.isEnabled = isEnabled
-
         initializeButtonActions()
-
-        editText.setGestureDelegate(delegate)
+        initializeGestures()
     }
 
 
     private fun inflateChildren() {
         upButton = AppCompatImageButton(context)
-        upButton.setImageResource(R.drawable.arrow_up_selector)
+        upButton.setImageResource(R.drawable.arrow_up_selector_24)
         upButton.setBackgroundResource(R.drawable.arrow_up_background)
 
         if (data.orientation == HORIZONTAL) {
@@ -184,15 +196,18 @@ class NumberPicker @JvmOverloads constructor(
         }
 
         editText =
-                EditText(ContextThemeWrapper(context, android.R.style.Widget_Material_EditText), null, 0)
-        editText.gravity = Gravity.CENTER
-        editText.inputType = InputType.TYPE_CLASS_NUMBER
+                EditText(ContextThemeWrapper(context, R.style.NumberPicker_EditTextStyle), null, 0)
 
         editText.setLines(1)
         editText.setEms(max(abs(maxValue).toString().length, abs(minValue).toString().length))
+        editText.isFocusableInTouchMode = true
+        editText.isFocusable = true
+        editText.isClickable = true
+        editText.isLongClickable = false
+
 
         downButton = AppCompatImageButton(context)
-        downButton.setImageResource(R.drawable.arrow_up_selector)
+        downButton.setImageResource(R.drawable.arrow_up_selector_24)
         downButton.setBackgroundResource(R.drawable.arrow_up_background)
         downButton.rotation = if (data.orientation == VERTICAL) 180f else -90f
 
@@ -206,9 +221,9 @@ class NumberPicker @JvmOverloads constructor(
         params3.weight = 0f
 
         if (data.orientation == VERTICAL) {
-            addView(upButton, params1)
-            addView(editText, params2)
             addView(downButton, params3)
+            addView(editText, params2)
+            addView(upButton, params1)
         } else {
             addView(downButton, params3)
             addView(editText, params2)
@@ -297,6 +312,51 @@ class NumberPicker @JvmOverloads constructor(
                 true
             }
         }
+
+        editText.doOnTextChanged { text, start, count, after ->
+            if (!text.isNullOrEmpty()) {
+                try {
+                    this.value = Integer.valueOf(text.toString())
+                } catch (e: NumberFormatException) {
+                    Timber.e(e)
+                }
+            }
+        }
+
+        editText.setOnFocusChangeListener { v, hasFocus ->
+
+            if (hasFocus) {
+                this.background.state = intArrayOf(android.R.attr.state_focused)
+            } else {
+                this.background.state = intArrayOf(-android.R.attr.state_focused)
+            }
+
+
+            if (!hasFocus) {
+                if (editText.text.isNullOrEmpty()) {
+                    editText.setText(data.value.toString())
+                }
+            }
+        }
+    }
+
+    private fun initializeGestures() {
+        longGesture = UILongPressGestureRecognizer(context)
+        longGesture.longPressTimeout = LONG_TAP_TIMEOUT
+        longGesture.actionListener = longGestureListener
+        longGesture.cancelsTouchesInView = false
+
+        tapGesture = UITapGestureRecognizer(context)
+        tapGesture.cancelsTouchesInView = false
+
+        delegate.addGestureRecognizer(longGesture)
+        delegate.addGestureRecognizer(tapGesture)
+
+        tapGesture.actionListener = tapGestureListener
+
+        delegate.isEnabled = isEnabled
+
+        editText.setGestureDelegate(delegate)
     }
 
     private fun startInteraction() {
@@ -319,17 +379,11 @@ class NumberPicker @JvmOverloads constructor(
                 val textView = contentView.findViewById<TextView>(android.R.id.text1)
                 textView.measure(0, 0)
                 textView.minWidth = textView.measuredWidth
-//                editText.text = text.toString()
-//                tooltip.offsetBy(-contentView.measuredWidth.toFloat(), 0f)
             }
         }
 
-        tooltip?.doOnShown {
-            //            it.update(text.toString())
-        }
-
+        tooltip?.doOnShown { it.update(data.value.toString()) }
         tooltip?.show(this, if (data.orientation == VERTICAL) Tooltip.Gravity.LEFT else Tooltip.Gravity.TOP, false)
-
 
     }
 
@@ -347,6 +401,7 @@ class NumberPicker @JvmOverloads constructor(
         const val TRACKER_LINEAR = 0
         const val ARROW_BUTTON_INITIAL_DELAY = 800L
         const val ARROW_BUTTON_FRAME_DELAY = 16L
+        const val LONG_TAP_TIMEOUT = 300L
 
         init {
             if (BuildConfig.DEBUG) {
@@ -383,6 +438,7 @@ interface Tracker {
     fun begin(x: Float, y: Float)
     fun addMovement(x: Float, y: Float)
     fun end()
+    var minDistance: Float
 }
 
 
@@ -395,7 +451,7 @@ class LinearTracker(
 
     private var initialValue: Int = 0
 
-    var minDistance: Float = 0f
+    override var minDistance: Float = 0f
     var downPosition: Float = 0f
 
     var minPoint = PointF(0f, 0f)
@@ -430,7 +486,7 @@ class LinearTracker(
     override fun addMovement(x: Float, y: Float) {
         Timber.i("addMovement($x, $y)")
 
-        val currentPosition = if (orientation == LinearLayout.VERTICAL) y else x
+        val currentPosition = if (orientation == LinearLayout.VERTICAL) -y else x
 
         val diff: Float
         val perc: Float
