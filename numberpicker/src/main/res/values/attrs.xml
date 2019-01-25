@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-
     <declare-styleable name="NumberPicker">
         <attr name="picker_value" format="integer" />
         <attr name="picker_stepSize" format="integer" />
         <attr name="picker_min" format="integer" />
         <attr name="picker_max" format="integer" />
         <attr name="picker_arrowStyle" format="reference" />
+        <attr name="picker_editTextStyle" format="reference" />
+        <attr name="picker_tooltipAnimationStyle" format="reference" />
+        <attr name="picker_tooltipStyle" format="reference" />
 
         <attr name="picker_tracker" format="enum">
             <enum name="linear" value="0" />
@@ -19,7 +21,6 @@
         </attr>
 
         <attr name="android:background" />
-
 
     </declare-styleable>
 

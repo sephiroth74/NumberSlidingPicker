@@ -3,7 +3,6 @@ package it.sephiroth.android.library.numberpicker
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PointF
-import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.MotionEvent
@@ -29,19 +28,18 @@ import kotlin.math.min
 import kotlin.math.sin
 
 class NumberPicker @JvmOverloads constructor(
-        context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr) {
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = R.attr.pickerStyle,
+        defStyleRes: Int = R.style.NumberPicker_Filled) : LinearLayout(context, attrs, defStyleAttr, defStyleRes) {
 
     private lateinit var editText: EditText
     private lateinit var upButton: AppCompatImageButton
     private lateinit var downButton: AppCompatImageButton
-    private var boxBackground: GradientDrawable? = null
 
     private val delegate = UIGestureRecognizerDelegate()
     private lateinit var longGesture: UILongPressGestureRecognizer
     private lateinit var tapGesture: UITapGestureRecognizer
-
-    private val initLocation = intArrayOf(0, 0)
 
     private var tooltip: Tooltip? = null
     private lateinit var tracker: Tracker
@@ -141,14 +139,18 @@ class NumberPicker @JvmOverloads constructor(
         }
 
     private var arrowStyle: Int
+    private var editTextStyleId: Int
+    private var tooltipStyleId: Int
 
     init {
         Timber.i("init")
 
         setWillNotDraw(false)
+        orientation = HORIZONTAL
+
         gravity = Gravity.CENTER
 
-        val array = context.theme.obtainStyledAttributes(attrs, R.styleable.NumberPicker, 0, R.style.NumberPickerStyle)
+        val array = context.theme.obtainStyledAttributes(attrs, R.styleable.NumberPicker, defStyleAttr, defStyleRes)
         try {
             val maxValue = array.getInteger(R.styleable.NumberPicker_picker_max, 100)
             val minValue = array.getInteger(R.styleable.NumberPicker_picker_min, 0)
@@ -156,11 +158,9 @@ class NumberPicker @JvmOverloads constructor(
             val orientation = array.getInteger(R.styleable.NumberPicker_picker_orientation, LinearLayout.VERTICAL)
             val value = array.getInteger(R.styleable.NumberPicker_picker_value, 0)
             arrowStyle = array.getResourceId(R.styleable.NumberPicker_picker_arrowStyle, 0)
-            val d = array.getDrawable(R.styleable.NumberPicker_android_background)
-            Timber.d("background = $d")
-
-            background = d
-
+            background = array.getDrawable(R.styleable.NumberPicker_android_background)
+            editTextStyleId = array.getResourceId(R.styleable.NumberPicker_picker_editTextStyle, R.style.NumberPicker_EditTextStyle)
+            tooltipStyleId = array.getResourceId(R.styleable.NumberPicker_picker_tooltipStyle, R.style.NumberPicker_ToolTipStyle)
             maxDistance = context.resources.getDimensionPixelSize(R.dimen.picker_distance_max)
 
             data = Data(value, minValue, maxValue, stepSize, orientation)
@@ -195,9 +195,7 @@ class NumberPicker @JvmOverloads constructor(
             upButton.rotation = 90f
         }
 
-        editText =
-                EditText(ContextThemeWrapper(context, R.style.NumberPicker_EditTextStyle), null, 0)
-
+        editText = EditText(ContextThemeWrapper(context, editTextStyleId), null, 0)
         editText.setLines(1)
         editText.setEms(max(abs(maxValue).toString().length, abs(minValue).toString().length))
         editText.isFocusableInTouchMode = true
@@ -324,19 +322,24 @@ class NumberPicker @JvmOverloads constructor(
         }
 
         editText.setOnFocusChangeListener { v, hasFocus ->
-
-            if (hasFocus) {
-                this.background.state = intArrayOf(android.R.attr.state_focused)
-            } else {
-                this.background.state = intArrayOf(-android.R.attr.state_focused)
-            }
-
+            setBackgroundFocused(hasFocus)
 
             if (!hasFocus) {
                 if (editText.text.isNullOrEmpty()) {
                     editText.setText(data.value.toString())
                 }
             }
+        }
+    }
+
+    private val focusedStateArray = intArrayOf(android.R.attr.state_focused)
+    private val unfocusedStateArray = intArrayOf(-android.R.attr.state_focused)
+
+    private fun setBackgroundFocused(hasFocus: Boolean) {
+        if (hasFocus) {
+            background?.state = focusedStateArray
+        } else {
+            background?.state = unfocusedStateArray
         }
     }
 
@@ -365,13 +368,13 @@ class NumberPicker @JvmOverloads constructor(
 
         tooltip = Tooltip.Builder(context)
                 .anchor(editText, 0, 0, false)
-                .styleId(R.style.ToolTipStyle)
+                .styleId(tooltipStyleId)
                 .arrow(true)
                 .closePolicy(ClosePolicy.TOUCH_NONE)
                 .overlay(false)
                 .showDuration(0)
                 .text(minValue.toString())
-                .animationStyle(if (orientation == VERTICAL) R.style.NumberPickerStyle_AnimationHorizontal else R.style.NumberPickerStyle_AnimationVertical)
+                .animationStyle(if (orientation == VERTICAL) R.style.NumberPicker_AnimationVertical else R.style.NumberPicker_AnimationHorizontal)
                 .create()
 
         tooltip?.doOnPrepare { tooltip ->

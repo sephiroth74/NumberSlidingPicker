@@ -1,45 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="NumberPickerStyle.AnimationHorizontal">
+    <!-- final style -->
+
+    <style name="NumberPicker">
+        <item name="picker_editTextStyle">@style/NumberPicker.EditTextStyle</item>
+        <item name="picker_tooltipStyle">@style/NumberPicker.ToolTipStyle</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+    </style>
+
+    <style name="NumberPicker.AnimationHorizontal">
         <item name="android:windowEnterAnimation">@anim/anim_in_right</item>
         <item name="android:windowExitAnimation">@anim/anim_out</item>
     </style>
 
-    <style name="NumberPickerStyle.AnimationVertical">
+    <style name="NumberPicker.AnimationVertical">
         <item name="android:windowEnterAnimation">@anim/anim_in_bottom</item>
         <item name="android:windowExitAnimation">@anim/anim_out</item>
     </style>
 
-    <style name="ToolTipStyle" parent="ToolTipLayoutDefaultStyle">
-        <item name="ttlm_animationStyle">@style/NumberPickerStyle.AnimationHorizontal</item>
+    <style name="NumberPicker.ToolTipStyle" parent="ToolTipLayoutDefaultStyle">
+        <item name="ttlm_animationStyle">@style/NumberPicker.AnimationHorizontal</item>
         <item name="ttlm_cornerRadius">10dp</item>
-        <item name="ttlm_textStyle">@style/NumberPickerStyle.ToolTipTextStyle</item>
+        <item name="ttlm_textStyle">@style/NumberPickerStyle.ToolTipStyle.ToolTipTextStyle</item>
     </style>
 
-    <style name="NumberPickerStyle.ToolTipTextStyle" parent="ToolTipTextStyle">
+    <style name="NumberPickerStyle.ToolTipStyle.ToolTipTextStyle" parent="ToolTipTextStyle">
         <item name="android:gravity">center</item>
         <item name="android:lines">1</item>
     </style>
 
-    <style name="NumberPickerStyle">
+    <style name="NumberPicker.Filled">
         <item name="picker_min">-100</item>
         <item name="picker_max">100</item>
         <item name="picker_value">0</item>
         <item name="picker_stepSize">1</item>
         <item name="picker_orientation">vertical</item>
         <item name="picker_tracker">linear</item>
-        <item name="android:orientation">horizontal</item>
         <item name="picker_arrowStyle">@style/NumberPicker.ArrowStyle</item>
         <item name="android:background">@drawable/mtrl_background_filled</item>
     </style>
 
-    <!-- final style -->
+    <style name="NumberPicker.Filled.Horizontal">
+        <item name="picker_orientation">horizontal</item>
+    </style>
 
-    <style name="NumberPicker" />
+    <style name="NumberPicker.Outlined">
+        <item name="picker_min">-100</item>
+        <item name="picker_max">100</item>
+        <item name="picker_value">0</item>
+        <item name="picker_stepSize">1</item>
+        <item name="picker_orientation">vertical</item>
+        <item name="picker_tracker">linear</item>
+        <item name="picker_arrowStyle">@style/NumberPicker.ArrowStyle</item>
+        <item name="android:background">@drawable/mtrl_background_outlined</item>
+    </style>
 
+    <style name="NumberPicker.Outlined.Horizontal">
+        <item name="picker_orientation">horizontal</item>
+    </style>
 
-    <style name="NumberPicker.ArrowStyle">
+    <style name="NumberPicker.None">
+        <item name="picker_min">-100</item>
+        <item name="picker_max">100</item>
+        <item name="picker_value">0</item>
+        <item name="picker_stepSize">1</item>
+        <item name="picker_orientation">vertical</item>
+        <item name="picker_tracker">linear</item>
+        <item name="picker_arrowStyle">@style/NumberPicker.ArrowStyle</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="NumberPicker.None.Horizontal">
+        <item name="picker_orientation">horizontal</item>
+    </style>
+
+    <style name="ArrowStyle" />
+
+    <style name="NumberPicker.ArrowStyle" parent="ArrowStyle">
         <item name="android:src">@drawable/arrow_up_selector_24</item>
         <item name="android:background">@drawable/arrow_up_background</item>
     </style>
