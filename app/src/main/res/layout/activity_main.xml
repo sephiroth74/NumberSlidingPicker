@@ -72,5 +72,34 @@
         app:layout_constraintEnd_toStartOf="@+id/numberPicker3"
         app:layout_constraintTop_toTopOf="@+id/numberPicker3" />
 
+    <it.sephiroth.android.library.numberpicker.NumberPicker
+        android:id="@+id/numberPicker4"
+        style="@style/NumberPicker.Filled.Horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:progress="0"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView3"
+        app:picker_max="200"
+        app:picker_min="-200"
+        app:picker_tracker="exponential" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:text="Horizontal Filled Picker"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/numberPicker4" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
