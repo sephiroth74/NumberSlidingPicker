@@ -12,6 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="32dp"
+        android:progress="50"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -24,8 +25,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:progress="50"
         app:layout_constraintEnd_toEndOf="@+id/numberPicker"
         app:layout_constraintTop_toBottomOf="@+id/numberPicker" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:gravity="right"
+        android:text="Picker 1"
+        app:layout_constraintBottom_toBottomOf="@+id/numberPicker"
+        app:layout_constraintEnd_toStartOf="@+id/numberPicker"
+        app:layout_constraintTop_toTopOf="@+id/numberPicker" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

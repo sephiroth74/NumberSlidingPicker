@@ -4,7 +4,10 @@
     <!-- final style -->
 
     <style name="NumberPicker">
-        <item name="picker_tracker">exponential</item>
+        <item name="picker_min">0</item>
+        <item name="picker_max">100</item>
+        <item name="picker_stepSize">1</item>
+        <item name="picker_tracker">linear</item>
         <item name="picker_editTextStyle">@style/NumberPicker.EditTextStyle</item>
         <item name="picker_tooltipStyle">@style/NumberPicker.ToolTipStyle</item>
         <item name="android:paddingLeft">8dp</item>
@@ -33,10 +36,6 @@
     </style>
 
     <style name="NumberPicker.Filled">
-        <item name="picker_min">-100</item>
-        <item name="picker_max">100</item>
-        <item name="picker_value">0</item>
-        <item name="picker_stepSize">1</item>
         <item name="picker_orientation">vertical</item>
 
         <item name="picker_arrowStyle">@style/NumberPicker.ArrowStyle</item>
@@ -48,10 +47,6 @@
     </style>
 
     <style name="NumberPicker.Outlined">
-        <item name="picker_min">-100</item>
-        <item name="picker_max">100</item>
-        <item name="picker_value">0</item>
-        <item name="picker_stepSize">1</item>
         <item name="picker_orientation">vertical</item>
         <item name="picker_arrowStyle">@style/NumberPicker.ArrowStyle</item>
         <item name="android:background">@drawable/mtrl_background_outlined</item>
@@ -62,10 +57,6 @@
     </style>
 
     <style name="NumberPicker.None">
-        <item name="picker_min">-100</item>
-        <item name="picker_max">100</item>
-        <item name="picker_value">0</item>
-        <item name="picker_stepSize">1</item>
         <item name="picker_orientation">vertical</item>
         <item name="picker_arrowStyle">@style/NumberPicker.ArrowStyle</item>
         <item name="android:background">@null</item>
