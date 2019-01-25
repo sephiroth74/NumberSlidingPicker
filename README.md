@@ -1,7 +1,10 @@
-Number Sliding Picker
+Material Number Sliding Picker
 ======================
 
-Number Picker for Android
+A widget that enables the user to select a number from a predefined range.
+Progress value can be changed using the up and down arrows, click and edit the editable text or swiping up/down or left/right.
+
+![Screen shot](./art/video.gif)
 
 [![Build Status](https://travis-ci.org/sephiroth74/NumberSlidingPicker.svg?branch=master)](https://travis-ci.org/sephiroth74/NumberSlidingPicker)
 
@@ -76,11 +79,6 @@ Usage
             // tracking ended
         }
 ```
-
-Screenshots
-===
-![Screen shot](./screenshots/video2.gif)
-
 
 License
 ===
