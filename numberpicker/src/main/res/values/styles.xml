@@ -81,6 +81,7 @@
         <item name="android:gravity">center</item>
         <item name="android:editable">true</item>
         <item name="android:background">@null</item>
+        <item name="android:imeOptions">actionDone</item>
     </style>
 
 </resources>

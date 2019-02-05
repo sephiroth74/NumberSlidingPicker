@@ -1,6 +1,7 @@
 package it.sephiroth.android.library.numberpicker
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.graphics.PointF
 import android.os.Handler
@@ -8,6 +9,8 @@ import android.util.AttributeSet
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -27,6 +30,7 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.sin
+
 
 class NumberPicker @JvmOverloads constructor(
         context: Context,
@@ -146,6 +150,9 @@ class NumberPicker @JvmOverloads constructor(
 
     init {
         setWillNotDraw(false)
+        isFocusable = true
+        isFocusableInTouchMode = true
+
         orientation = HORIZONTAL
         gravity = Gravity.CENTER
 
@@ -188,6 +195,11 @@ class NumberPicker @JvmOverloads constructor(
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
         delegate.isEnabled = enabled
+    }
+
+    private fun hideKeyboard() {
+        val imm = context.getSystemService(Activity.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(windowToken, 0)
     }
 
     private fun inflateChildren() {
@@ -240,6 +252,8 @@ class NumberPicker @JvmOverloads constructor(
                         requestFocus()
                         setProgress(progress + stepSize)
                         editText.clearFocus()
+                        hideKeyboard()
+
                         upButton.requestFocus()
                         upButton.isPressed = true
                         buttonInterval?.dispose()
@@ -249,7 +263,7 @@ class NumberPicker @JvmOverloads constructor(
                                 ARROW_BUTTON_FRAME_DELAY,
                                 TimeUnit.MILLISECONDS,
                                 Schedulers.io())
-                                .subscribeOn(AndroidSchedulers.mainThread())
+                                .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe {
                                     setProgress(progress + stepSize)
                                 }
@@ -276,6 +290,8 @@ class NumberPicker @JvmOverloads constructor(
                         requestFocus()
                         setProgress(progress - stepSize)
                         editText.clearFocus()
+                        hideKeyboard()
+
                         downButton.requestFocus()
                         downButton.isPressed = true
                         buttonInterval?.dispose()
@@ -285,7 +301,7 @@ class NumberPicker @JvmOverloads constructor(
                                 ARROW_BUTTON_FRAME_DELAY,
                                 TimeUnit.MILLISECONDS,
                                 Schedulers.io())
-                                .subscribeOn(AndroidSchedulers.mainThread())
+                                .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe {
                                     setProgress(progress - stepSize)
                                 }
@@ -322,6 +338,16 @@ class NumberPicker @JvmOverloads constructor(
                 if (editText.text.isNullOrEmpty()) {
                     editText.setText(data.value.toString())
                 }
+            }
+        }
+
+        editText.setOnEditorActionListener { _, actionId, _ ->
+            when (actionId) {
+                EditorInfo.IME_ACTION_DONE -> {
+                    editText.clearFocus()
+                    true
+                }
+                else -> false
             }
         }
     }
