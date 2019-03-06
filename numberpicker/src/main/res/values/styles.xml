@@ -75,13 +75,24 @@
 
     <style name="NumberPicker.EditTextStyle" parent="Widget.AppCompat.EditText">
         <item name="android:textAppearance">?android:attr/textAppearanceSmall</item>
-        <item name="android:selectAllOnFocus">false</item>
+        <item name="android:selectAllOnFocus">true</item>
         <item name="android:textIsSelectable">false</item>
         <item name="android:inputType">numberSigned</item>
         <item name="android:gravity">center</item>
         <item name="android:editable">true</item>
         <item name="android:background">@null</item>
         <item name="android:imeOptions">actionDone</item>
+    </style>
+
+    <style name="NumberPicker.EditTextStyle.Disabled">
+        <item name="android:selectAllOnFocus">false</item>
+        <item name="android:textIsSelectable">false</item>
+        <item name="android:selectable">false</item>
+        <item name="android:focusable">false</item>
+        <item name="android:focusableInTouchMode">false</item>
+        <item name="android:inputType">none</item>
+        <item name="android:editable">false</item>
+        <item name="android:clickable">false</item>
     </style>
 
 </resources>

@@ -16,7 +16,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatImageButton
-import androidx.core.widget.doOnTextChanged
 import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -71,6 +70,7 @@ class NumberPicker @JvmOverloads constructor(
     private var buttonInterval: Disposable? = null
 
     private val longGestureListener = { it: UIGestureRecognizer ->
+        Timber.i("longGestureListener = ${it.state}")
         when {
             it.state == UIGestureRecognizer.State.Began -> {
                 requestFocus()
@@ -87,7 +87,8 @@ class NumberPicker @JvmOverloads constructor(
             }
 
             it.state == UIGestureRecognizer.State.Changed -> {
-                var diff = if (data.orientation == VERTICAL) it.currentLocationY - it.downLocationY else it.currentLocationX - it.downLocationX
+                var diff =
+                        if (data.orientation == VERTICAL) it.currentLocationY - it.downLocationY else it.currentLocationX - it.downLocationX
                 if (diff > tracker.minDistance) {
                     diff = tracker.minDistance
                 } else if (diff < -tracker.minDistance) {
@@ -115,6 +116,7 @@ class NumberPicker @JvmOverloads constructor(
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun setProgress(value: Int, fromUser: Boolean = true) {
+        Timber.i("setProgress($value, $fromUser)")
         if (value != data.value) {
             data.value = value
             tooltip?.update(data.value.toString())
@@ -147,6 +149,8 @@ class NumberPicker @JvmOverloads constructor(
         set(value) {
             data.stepSize = value
         }
+
+    private var initialized = false
 
     init {
         setWillNotDraw(false)
@@ -241,7 +245,6 @@ class NumberPicker @JvmOverloads constructor(
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initializeButtonActions() {
-
         upButton.setOnTouchListener { _, event ->
             if (!isEnabled) {
                 false
@@ -263,10 +266,10 @@ class NumberPicker @JvmOverloads constructor(
                                 ARROW_BUTTON_FRAME_DELAY,
                                 TimeUnit.MILLISECONDS,
                                 Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe {
-                                    setProgress(progress + stepSize)
-                                }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe {
+                                setProgress(progress + stepSize)
+                            }
                     }
 
                     MotionEvent.ACTION_UP -> {
@@ -301,10 +304,10 @@ class NumberPicker @JvmOverloads constructor(
                                 ARROW_BUTTON_FRAME_DELAY,
                                 TimeUnit.MILLISECONDS,
                                 Schedulers.io())
-                                .observeOn(AndroidSchedulers.mainThread())
-                                .subscribe {
-                                    setProgress(progress - stepSize)
-                                }
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe {
+                                setProgress(progress - stepSize)
+                            }
                     }
 
                     MotionEvent.ACTION_UP -> {
@@ -321,21 +324,23 @@ class NumberPicker @JvmOverloads constructor(
             }
         }
 
-        editText.doOnTextChanged { text, _, _, _ ->
-            if (!text.isNullOrEmpty()) {
-                try {
-                    this.setProgress(Integer.valueOf(text.toString()))
-                } catch (e: NumberFormatException) {
-                    Timber.e(e)
-                }
-            }
-        }
+//        editText.doOnTextChanged { text, _, _, _ ->
+//            if (!text.isNullOrEmpty()) {
+//                try {
+//                    this.setProgress(Integer.valueOf(text.toString()))
+//                } catch (e: NumberFormatException) {
+//                    Timber.e(e)
+//                }
+//            }
+//        }
 
         editText.setOnFocusChangeListener { _, hasFocus ->
             setBackgroundFocused(hasFocus)
 
             if (!hasFocus) {
-                if (editText.text.isNullOrEmpty()) {
+                if (!editText.text.isNullOrEmpty()) {
+                    setProgress(Integer.valueOf(editText.text.toString()), true)
+                } else {
                     editText.setText(data.value.toString())
                 }
             }
@@ -383,15 +388,15 @@ class NumberPicker @JvmOverloads constructor(
         animate().alpha(0.5f).start()
 
         tooltip = Tooltip.Builder(context)
-                .anchor(editText, 0, 0, false)
-                .styleId(tooltipStyleId)
-                .arrow(true)
-                .closePolicy(ClosePolicy.TOUCH_NONE)
-                .overlay(false)
-                .showDuration(0)
-                .text(if (minValue.toString().length > maxValue.toString().length) minValue.toString() else maxValue.toString())
-                .animationStyle(if (orientation == VERTICAL) R.style.NumberPicker_AnimationVertical else R.style.NumberPicker_AnimationHorizontal)
-                .create()
+            .anchor(editText, 0, 0, false)
+            .styleId(tooltipStyleId)
+            .arrow(true)
+            .closePolicy(ClosePolicy.TOUCH_NONE)
+            .overlay(false)
+            .showDuration(0)
+            .text(if (minValue.toString().length > maxValue.toString().length) minValue.toString() else maxValue.toString())
+            .animationStyle(if (orientation == VERTICAL) R.style.NumberPicker_AnimationVertical else R.style.NumberPicker_AnimationHorizontal)
+            .create()
 
         tooltip?.doOnPrepare { tooltip ->
             tooltip.contentView?.let { contentView ->
@@ -430,12 +435,6 @@ class NumberPicker @JvmOverloads constructor(
 
         val FOCUSED_STATE_ARRAY = intArrayOf(android.R.attr.state_focused)
         val UNFOCUSED_STATE_ARRAY = intArrayOf(0, -android.R.attr.state_focused)
-
-        init {
-            if (BuildConfig.DEBUG) {
-                Timber.plant(Timber.DebugTree())
-            }
-        }
     }
 }
 

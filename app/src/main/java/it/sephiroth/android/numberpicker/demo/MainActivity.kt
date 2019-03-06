@@ -2,9 +2,7 @@ package it.sephiroth.android.numberpicker.demo
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import it.sephiroth.android.library.numberpicker.doOnProgressChanged
-import it.sephiroth.android.library.numberpicker.doOnStartTrackingTouch
-import it.sephiroth.android.library.numberpicker.doOnStopTrackingTouch
+import it.sephiroth.android.library.numberpicker.setListener
 import kotlinx.android.synthetic.main.activity_main.*
 import timber.log.Timber
 
@@ -14,16 +12,18 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        numberPicker.doOnProgressChanged { numberPicker, progress, formUser ->
-            // progress changed
-        }
+        numberPicker.setListener {
+            onProgressChanged { numberPicker, progress, fromUser ->
+                Timber.v("doOnProgressChanged($progress, $fromUser)")
+            }
 
-        numberPicker.doOnStartTrackingTouch { numberPicker ->
-            // tracking started
-        }
+            onStartTrackingTouch {
+                Timber.v("onStartTrackingTouch")
+            }
 
-        numberPicker.doOnStopTrackingTouch { numberPicker ->
-            // tracking ended
+            onStopTrackingTouch {
+                Timber.v("onStopTrackingTouch")
+            }
         }
     }
 }
