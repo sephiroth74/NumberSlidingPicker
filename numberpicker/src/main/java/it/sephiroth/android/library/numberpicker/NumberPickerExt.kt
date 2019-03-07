@@ -20,13 +20,13 @@ inline fun NumberPicker.addProgressChangedListener(
                 numberPicker: NumberPicker,
                 progress: Int,
                 formUser: Boolean
-        ) -> Unit = { _, _, _ -> },
+                                     ) -> Unit = { _, _, _ -> },
 
         crossinline startTrackingTouch: (numberPicker: NumberPicker) -> Unit = { _ -> },
 
         crossinline stopTrackingTouch: (numberPicker: NumberPicker) -> Unit = { _ -> }
 
-): NumberPicker.OnNumberPickerChangeListener {
+                                                  ): NumberPicker.OnNumberPickerChangeListener {
     val listener = object : NumberPicker.OnNumberPickerChangeListener {
 
         override fun onProgressChanged(numberPicker: NumberPicker, progress: Int, fromUser: Boolean) {
@@ -44,4 +44,41 @@ inline fun NumberPicker.addProgressChangedListener(
     }
     numberPickerChangeListener = listener
     return listener
+}
+
+class _OnNumberPickerChangeListener : NumberPicker.OnNumberPickerChangeListener {
+
+    override fun onProgressChanged(numberPicker: NumberPicker, progress: Int, fromUser: Boolean) {
+        _onProgressChanged?.invoke(numberPicker, progress, fromUser)
+    }
+
+    override fun onStartTrackingTouch(numberPicker: NumberPicker) {
+        _onStartTrackingTouch?.invoke(numberPicker)
+    }
+
+    override fun onStopTrackingTouch(numberPicker: NumberPicker) {
+        _onStopTrackingTouch?.invoke(numberPicker)
+    }
+
+    fun onProgressChanged(func: (NumberPicker, Int, Boolean) -> Unit) {
+        _onProgressChanged = func
+    }
+
+    fun onStartTrackingTouch(func: (NumberPicker) -> Unit) {
+        _onStartTrackingTouch = func
+    }
+
+    fun onStopTrackingTouch(func: (NumberPicker) -> Unit) {
+        _onStopTrackingTouch = func
+    }
+
+    private var _onProgressChanged: ((NumberPicker, Int, Boolean) -> Unit)? = null
+    private var _onStartTrackingTouch: ((NumberPicker) -> Unit)? = null
+    private var _onStopTrackingTouch: ((NumberPicker) -> Unit)? = null
+}
+
+inline fun NumberPicker.setListener(func: _OnNumberPickerChangeListener.() -> Unit) {
+    val listener = _OnNumberPickerChangeListener()
+    listener.func()
+    numberPickerChangeListener = listener
 }
