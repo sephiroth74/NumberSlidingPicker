@@ -20,7 +20,11 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import it.sephiroth.android.library.uigestures.*
+import it.sephiroth.android.library.uigestures.UIGestureRecognizer
+import it.sephiroth.android.library.uigestures.UIGestureRecognizerDelegate
+import it.sephiroth.android.library.uigestures.UILongPressGestureRecognizer
+import it.sephiroth.android.library.uigestures.UITapGestureRecognizer
+import it.sephiroth.android.library.uigestures.setGestureDelegate
 import it.sephiroth.android.library.xtooltip.ClosePolicy
 import it.sephiroth.android.library.xtooltip.Tooltip
 import timber.log.Timber
@@ -57,6 +61,7 @@ class NumberPicker @JvmOverloads constructor(
     private val delegate = UIGestureRecognizerDelegate()
     private lateinit var longGesture: UILongPressGestureRecognizer
     private lateinit var tapGesture: UITapGestureRecognizer
+    private var disableGestures: Boolean = false
 
     private var tooltip: Tooltip? = null
     private var maxDistance: Int
@@ -171,6 +176,7 @@ class NumberPicker @JvmOverloads constructor(
             background = array.getDrawable(R.styleable.NumberPicker_android_background)
             editTextStyleId = array.getResourceId(R.styleable.NumberPicker_picker_editTextStyle, R.style.NumberPicker_EditTextStyle)
             tooltipStyleId = array.getResourceId(R.styleable.NumberPicker_picker_tooltipStyle, R.style.NumberPicker_ToolTipStyle)
+            disableGestures = array.getBoolean(R.styleable.NumberPicker_picker_disableGestures, false)
             maxDistance = context.resources.getDimensionPixelSize(R.dimen.picker_distance_max)
 
             data = Data(value, minValue, maxValue, stepSize, orientation)
@@ -193,7 +199,9 @@ class NumberPicker @JvmOverloads constructor(
         }
 
         initializeButtonActions()
-        initializeGestures()
+        if(!disableGestures) {
+            initializeGestures()
+        }
     }
 
     override fun setEnabled(enabled: Boolean) {
