@@ -8,6 +8,7 @@
         <attr name="picker_editTextStyle" format="reference" />
         <attr name="picker_tooltipAnimationStyle" format="reference" />
         <attr name="picker_tooltipStyle" format="reference" />
+        <attr name="picker_disableGestures" format="boolean" />
         <attr name="android:progress" />
 
         <attr name="picker_tracker" format="enum">
