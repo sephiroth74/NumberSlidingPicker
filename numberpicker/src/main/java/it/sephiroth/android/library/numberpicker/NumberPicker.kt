@@ -280,7 +280,7 @@ class NumberPicker @JvmOverloads constructor(
                             }
                     }
 
-                    MotionEvent.ACTION_UP -> {
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                         upButton.isPressed = false
                         buttonInterval?.dispose()
                         buttonInterval = null
@@ -318,7 +318,7 @@ class NumberPicker @JvmOverloads constructor(
                             }
                     }
 
-                    MotionEvent.ACTION_UP -> {
+                    MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                         downButton.isPressed = false
 
                         buttonInterval?.dispose()
