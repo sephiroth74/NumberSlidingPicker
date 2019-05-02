@@ -269,21 +269,29 @@ class NumberPicker @JvmOverloads constructor(
                         upButton.isPressed = true
                         buttonInterval?.dispose()
 
-                        buttonInterval = Observable.interval(
+                        if(!disableGestures) {
+                            buttonInterval = Observable.interval(
                                 ARROW_BUTTON_INITIAL_DELAY,
                                 ARROW_BUTTON_FRAME_DELAY,
                                 TimeUnit.MILLISECONDS,
                                 Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe {
-                                setProgress(progress + stepSize)
-                            }
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    setProgress(progress + stepSize)
+                                }
+                        }
                     }
 
                     MotionEvent.ACTION_UP -> {
                         upButton.isPressed = false
                         buttonInterval?.dispose()
                         buttonInterval = null
+                    }
+
+                    MotionEvent.ACTION_CANCEL -> {
+                        if (disableGestures) {
+                            upButton.isPressed = false
+                        }
                     }
                 }
 
@@ -307,15 +315,17 @@ class NumberPicker @JvmOverloads constructor(
                         downButton.isPressed = true
                         buttonInterval?.dispose()
 
-                        buttonInterval = Observable.interval(
+                        if(!disableGestures) {
+                            buttonInterval = Observable.interval(
                                 ARROW_BUTTON_INITIAL_DELAY,
                                 ARROW_BUTTON_FRAME_DELAY,
                                 TimeUnit.MILLISECONDS,
                                 Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe {
-                                setProgress(progress - stepSize)
-                            }
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe {
+                                    setProgress(progress - stepSize)
+                                }
+                        }
                     }
 
                     MotionEvent.ACTION_UP -> {
@@ -323,8 +333,12 @@ class NumberPicker @JvmOverloads constructor(
 
                         buttonInterval?.dispose()
                         buttonInterval = null
+                    }
 
-
+                    MotionEvent.ACTION_CANCEL -> {
+                        if (disableGestures) {
+                            downButton.isPressed = false
+                        }
                     }
                 }
 
