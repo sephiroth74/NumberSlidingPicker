@@ -20,11 +20,7 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import it.sephiroth.android.library.uigestures.UIGestureRecognizer
-import it.sephiroth.android.library.uigestures.UIGestureRecognizerDelegate
-import it.sephiroth.android.library.uigestures.UILongPressGestureRecognizer
-import it.sephiroth.android.library.uigestures.UITapGestureRecognizer
-import it.sephiroth.android.library.uigestures.setGestureDelegate
+import it.sephiroth.android.library.uigestures.*
 import it.sephiroth.android.library.xtooltip.ClosePolicy
 import it.sephiroth.android.library.xtooltip.Tooltip
 import timber.log.Timber
@@ -121,7 +117,7 @@ class NumberPicker @JvmOverloads constructor(
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun setProgress(value: Int, fromUser: Boolean = true) {
-        Timber.i("setProgress($value, $fromUser)")
+        // Timber.i("setProgress($value, $fromUser)")
         if (value != data.value) {
             data.value = value
             tooltip?.update(data.value.toString())
@@ -199,7 +195,7 @@ class NumberPicker @JvmOverloads constructor(
         }
 
         initializeButtonActions()
-        if(!disableGestures) {
+        if (!disableGestures) {
             initializeGestures()
         }
     }
@@ -237,13 +233,13 @@ class NumberPicker @JvmOverloads constructor(
         downButton.setBackgroundResource(R.drawable.arrow_up_background)
         downButton.rotation = if (data.orientation == VERTICAL) 180f else -90f
 
-        val params1 = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val params1 = LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         params1.weight = 0f
 
-        val params2 = LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val params2 = LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT)
         params2.weight = 1f
 
-        val params3 = LinearLayout.LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        val params3 = LayoutParams(LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         params3.weight = 0f
 
         addView(downButton, params3)
@@ -443,6 +439,8 @@ class NumberPicker @JvmOverloads constructor(
 
         val FOCUSED_STATE_ARRAY = intArrayOf(android.R.attr.state_focused)
         val UNFOCUSED_STATE_ARRAY = intArrayOf(0, -android.R.attr.state_focused)
+
+
     }
 }
 
@@ -612,3 +610,4 @@ internal class LinearTracker(
         callback.invoke(finalValue)
     }
 }
+
