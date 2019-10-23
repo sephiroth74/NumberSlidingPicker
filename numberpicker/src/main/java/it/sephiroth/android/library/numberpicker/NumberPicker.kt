@@ -45,7 +45,8 @@ class NumberPicker @JvmOverloads constructor(
 
     var numberPickerChangeListener: OnNumberPickerChangeListener? = null
 
-    private lateinit var editText: EditText
+    lateinit var editText: EditText
+        private set
     private lateinit var upButton: AppCompatImageButton
     private lateinit var downButton: AppCompatImageButton
     private lateinit var tracker: Tracker
