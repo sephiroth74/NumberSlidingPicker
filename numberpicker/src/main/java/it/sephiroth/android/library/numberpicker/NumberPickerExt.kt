@@ -1,35 +1,43 @@
+@file:Suppress("unused")
 package it.sephiroth.android.library.numberpicker
 
+import kotlinx.coroutines.*
 
 inline fun NumberPicker.doOnProgressChanged(
-        crossinline action: (
-                numberPicker: NumberPicker,
-                progress: Int,
-                formUser: Boolean) -> Unit) =
-        addProgressChangedListener(progressChanged = action)
+    crossinline action: (
+        numberPicker: NumberPicker,
+        progress: Int,
+        formUser: Boolean
+    ) -> Unit
+) =
+    addProgressChangedListener(progressChanged = action)
 
 inline fun NumberPicker.doOnStartTrackingTouch(crossinline action: (numberPicker: NumberPicker) -> Unit) =
-        addProgressChangedListener(startTrackingTouch = action)
+    addProgressChangedListener(startTrackingTouch = action)
 
 inline fun NumberPicker.doOnStopTrackingTouch(crossinline action: (numberPicker: NumberPicker) -> Unit) =
-        addProgressChangedListener(stopTrackingTouch = action)
+    addProgressChangedListener(stopTrackingTouch = action)
 
 
 inline fun NumberPicker.addProgressChangedListener(
-        crossinline progressChanged: (
-                numberPicker: NumberPicker,
-                progress: Int,
-                formUser: Boolean
-                                     ) -> Unit = { _, _, _ -> },
+    crossinline progressChanged: (
+        numberPicker: NumberPicker,
+        progress: Int,
+        formUser: Boolean
+    ) -> Unit = { _, _, _ -> },
 
-        crossinline startTrackingTouch: (numberPicker: NumberPicker) -> Unit = { _ -> },
+    crossinline startTrackingTouch: (numberPicker: NumberPicker) -> Unit = { _ -> },
 
-        crossinline stopTrackingTouch: (numberPicker: NumberPicker) -> Unit = { _ -> }
+    crossinline stopTrackingTouch: (numberPicker: NumberPicker) -> Unit = { _ -> }
 
-                                                  ): NumberPicker.OnNumberPickerChangeListener {
+): NumberPicker.OnNumberPickerChangeListener {
     val listener = object : NumberPicker.OnNumberPickerChangeListener {
 
-        override fun onProgressChanged(numberPicker: NumberPicker, progress: Int, fromUser: Boolean) {
+        override fun onProgressChanged(
+            numberPicker: NumberPicker,
+            progress: Int,
+            fromUser: Boolean
+        ) {
             progressChanged.invoke(numberPicker, progress, fromUser)
         }
 
@@ -46,7 +54,7 @@ inline fun NumberPicker.addProgressChangedListener(
     return listener
 }
 
-class _OnNumberPickerChangeListener : NumberPicker.OnNumberPickerChangeListener {
+class OnNumberPickerChangeListener : NumberPicker.OnNumberPickerChangeListener {
 
     override fun onProgressChanged(numberPicker: NumberPicker, progress: Int, fromUser: Boolean) {
         _onProgressChanged?.invoke(numberPicker, progress, fromUser)
@@ -77,8 +85,24 @@ class _OnNumberPickerChangeListener : NumberPicker.OnNumberPickerChangeListener 
     private var _onStopTrackingTouch: ((NumberPicker) -> Unit)? = null
 }
 
-inline fun NumberPicker.setListener(func: _OnNumberPickerChangeListener.() -> Unit) {
-    val listener = _OnNumberPickerChangeListener()
+inline fun NumberPicker.setListener(func: OnNumberPickerChangeListener.() -> Unit) {
+    val listener = OnNumberPickerChangeListener()
     listener.func()
     numberPickerChangeListener = listener
+}
+
+fun intervalJob(
+    initialDelay: Long = 0L,
+    period: Long = 700L,
+    scope: CoroutineScope = CoroutineScope(Dispatchers.Main),
+    callback: (Int) -> Unit
+): Job {
+    var value = 0
+    return scope.launch {
+        delay(initialDelay)
+        while (isActive) {
+            callback(value++)
+            delay(period)
+        }
+    }
 }

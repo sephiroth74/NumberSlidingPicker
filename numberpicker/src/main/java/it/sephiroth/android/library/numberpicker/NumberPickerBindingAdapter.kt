@@ -5,7 +5,12 @@ import androidx.databinding.InverseBindingMethod
 import androidx.databinding.InverseBindingMethods
 
 @Suppress("unused")
-@InverseBindingMethods(InverseBindingMethod(type = NumberPicker::class, attribute = "android:progress"))
+@InverseBindingMethods(
+    InverseBindingMethod(
+        type = NumberPicker::class,
+        attribute = "android:progress"
+    )
+)
 class NumberPickerBindingAdapter {
     companion object {
         @BindingAdapter("progress")
@@ -30,30 +35,40 @@ class NumberPickerBindingAdapter {
         }
 
 
-        @BindingAdapter(value = ["android:onStartTrackingTouch", "android:onStopTrackingTouch", "android:onProgressChanged", "android:progressAttrChanged"], requireAll = false)
+        @BindingAdapter(
+            value = ["android:onStartTrackingTouch", "android:onStopTrackingTouch", "android:onProgressChanged", "android:progressAttrChanged"],
+            requireAll = false
+        )
         @JvmStatic
-        fun bindListener(view: NumberPicker,
-                         startListener: OnStartTrackingTouch?,
-                         stopListener: OnStopTrackingTouch?,
-                         progressListener: OnProgressChanged?,
-                         attrChanged: Boolean?) {
+        fun bindListener(
+            view: NumberPicker,
+            startListener: OnStartTrackingTouch?,
+            stopListener: OnStopTrackingTouch?,
+            progressListener: OnProgressChanged?,
+            attrChanged: Boolean?
+        ) {
             if (startListener == null && stopListener == null && progressListener == null) {
                 view.numberPickerChangeListener = null
             } else {
-                view.numberPickerChangeListener = object : NumberPicker.OnNumberPickerChangeListener {
-                    override fun onProgressChanged(numberPicker: NumberPicker, progress: Int, fromUser: Boolean) {
-                        progressListener?.onProgressChanged(numberPicker, progress, fromUser)
-                    }
+                view.numberPickerChangeListener =
+                    object : NumberPicker.OnNumberPickerChangeListener {
+                        override fun onProgressChanged(
+                            numberPicker: NumberPicker,
+                            progress: Int,
+                            fromUser: Boolean
+                        ) {
+                            progressListener?.onProgressChanged(numberPicker, progress, fromUser)
+                        }
 
-                    override fun onStartTrackingTouch(numberPicker: NumberPicker) {
-                        startListener?.onStartTrackingTouch(numberPicker)
-                    }
+                        override fun onStartTrackingTouch(numberPicker: NumberPicker) {
+                            startListener?.onStartTrackingTouch(numberPicker)
+                        }
 
-                    override fun onStopTrackingTouch(numberPicker: NumberPicker) {
-                        stopListener?.onStopTrackingTouch(numberPicker)
-                    }
+                        override fun onStopTrackingTouch(numberPicker: NumberPicker) {
+                            stopListener?.onStopTrackingTouch(numberPicker)
+                        }
 
-                }
+                    }
             }
         }
     }

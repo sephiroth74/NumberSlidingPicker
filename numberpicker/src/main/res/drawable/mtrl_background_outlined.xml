@@ -4,8 +4,7 @@
     <item android:state_focused="true">
         <shape android:shape="rectangle">
             <corners android:radius="@dimen/mtrl_textinput_box_corner_radius_medium" tools:ignore="PrivateResource" />
-            <stroke android:width="@dimen/mtrl_textinput_box_stroke_width_default" android:color="?attr/colorControlActivated"
-                tools:ignore="PrivateResource" />
+            <stroke android:width="@dimen/mtrl_textinput_box_stroke_width_default" android:color="?attr/colorControlActivated" tools:ignore="PrivateResource" />
 
             <solid android:color="@android:color/transparent" />
         </shape>
@@ -14,8 +13,7 @@
     <item android:state_focused="false">
         <shape android:shape="rectangle">
             <corners android:radius="@dimen/mtrl_textinput_box_corner_radius_medium" tools:ignore="PrivateResource" />
-            <stroke android:width="@dimen/mtrl_textinput_box_stroke_width_default"
-                android:color="@color/mtrl_textinput_default_box_stroke_color" tools:ignore="PrivateResource" />
+            <stroke android:width="@dimen/mtrl_textinput_box_stroke_width_default" android:color="@color/mtrl_textinput_default_box_stroke_color" tools:ignore="PrivateResource" />
 
             <solid android:color="@android:color/transparent" />
         </shape>
