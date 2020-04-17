@@ -16,7 +16,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.AppCompatImageButton
-import it.sephiroth.android.library.uigestures.*
+//import it.sephiroth.android.library.uigestures.*
 import it.sephiroth.android.library.xtooltip.ClosePolicy
 import it.sephiroth.android.library.xtooltip.Tooltip
 import kotlinx.coroutines.Job
@@ -50,9 +50,9 @@ class NumberPicker @JvmOverloads constructor(
     private var editTextStyleId: Int
     private var tooltipStyleId: Int
 
-    private val delegate = UIGestureRecognizerDelegate()
-    private lateinit var longGesture: UILongPressGestureRecognizer
-    private lateinit var tapGesture: UITapGestureRecognizer
+//    private val delegate = UIGestureRecognizerDelegate()
+//    private lateinit var longGesture: UILongPressGestureRecognizer
+//    private lateinit var tapGesture: UITapGestureRecognizer
     private var disableGestures: Boolean = false
 
     private var tooltip: Tooltip? = null
@@ -66,55 +66,55 @@ class NumberPicker @JvmOverloads constructor(
 
     private var buttonIntervalJob: Job? = null
 
-    private val longGestureListener = { it: UIGestureRecognizer ->
-        Timber.i("longGestureListener = ${it.state}")
-        when (it.state) {
-            UIGestureRecognizer.State.Began -> {
-                requestFocus()
-                editText.isSelected = false
-                editText.clearFocus()
+//    private val longGestureListener = { it: UIGestureRecognizer ->
+//        Timber.i("longGestureListener = ${it.state}")
+//        when (it.state) {
+//            UIGestureRecognizer.State.Began -> {
+//                requestFocus()
+//                editText.isSelected = false
+//                editText.clearFocus()
+//
+//                tracker.begin(it.downLocationX, it.downLocationY)
+//                startInteraction()
+//            }
+//            UIGestureRecognizer.State.Ended -> {
+//                tracker.end()
+//                endInteraction()
+//            }
+//            UIGestureRecognizer.State.Changed -> {
+//                var diff =
+//                    if (data.orientation == VERTICAL) it.currentLocationY - it.downLocationY else it.currentLocationX - it.downLocationX
+//                if (diff > tracker.minDistance) {
+//                    diff = tracker.minDistance
+//                } else if (diff < -tracker.minDistance) {
+//                    diff = -tracker.minDistance
+//                }
+//                val final2 = sin((diff / tracker.minDistance) * Math.PI / 2).toFloat()
+//
+//                tooltip?.let { tooltip ->
+//                    when (data.orientation) {
+//                        VERTICAL -> tooltip.offsetTo(
+//                            tooltip.offsetX,
+//                            final2 / 2 * tracker.minDistance
+//                        )
+//                        HORIZONTAL -> tooltip.offsetTo(
+//                            final2 / 2 * tracker.minDistance,
+//                            tooltip.offsetY
+//                        )
+//                    }
+//                }
+//
+//                tracker.addMovement(it.currentLocationX, it.currentLocationY)
+//            }
+//            else -> {}
+//        }
+//    }
 
-                tracker.begin(it.downLocationX, it.downLocationY)
-                startInteraction()
-            }
-            UIGestureRecognizer.State.Ended -> {
-                tracker.end()
-                endInteraction()
-            }
-            UIGestureRecognizer.State.Changed -> {
-                var diff =
-                    if (data.orientation == VERTICAL) it.currentLocationY - it.downLocationY else it.currentLocationX - it.downLocationX
-                if (diff > tracker.minDistance) {
-                    diff = tracker.minDistance
-                } else if (diff < -tracker.minDistance) {
-                    diff = -tracker.minDistance
-                }
-                val final2 = sin((diff / tracker.minDistance) * Math.PI / 2).toFloat()
-
-                tooltip?.let { tooltip ->
-                    when (data.orientation) {
-                        VERTICAL -> tooltip.offsetTo(
-                            tooltip.offsetX,
-                            final2 / 2 * tracker.minDistance
-                        )
-                        HORIZONTAL -> tooltip.offsetTo(
-                            final2 / 2 * tracker.minDistance,
-                            tooltip.offsetY
-                        )
-                    }
-                }
-
-                tracker.addMovement(it.currentLocationX, it.currentLocationY)
-            }
-            else -> {}
-        }
-    }
-
-    private val tapGestureListener = { _: UIGestureRecognizer ->
-        requestFocus()
-        if (!editText.isFocused)
-            editText.requestFocus()
-    }
+//    private val tapGestureListener = { _: UIGestureRecognizer ->
+//        requestFocus()
+//        if (!editText.isFocused)
+//            editText.requestFocus()
+//    }
 
     @Suppress("MemberVisibilityCanBePrivate")
     fun setProgress(value: Int, fromUser: Boolean = true) {
@@ -215,7 +215,7 @@ class NumberPicker @JvmOverloads constructor(
 
     override fun setEnabled(enabled: Boolean) {
         super.setEnabled(enabled)
-        delegate.isEnabled = enabled
+//        delegate.isEnabled = enabled
     }
 
     private fun hideKeyboard() {
@@ -364,22 +364,22 @@ class NumberPicker @JvmOverloads constructor(
     }
 
     private fun initializeGestures() {
-        longGesture = UILongPressGestureRecognizer(context)
-        longGesture.longPressTimeout = LONG_TAP_TIMEOUT
-        longGesture.actionListener = longGestureListener
-        longGesture.cancelsTouchesInView = false
+//        longGesture = UILongPressGestureRecognizer(context)
+//        longGesture.longPressTimeout = LONG_TAP_TIMEOUT
+//        longGesture.actionListener = longGestureListener
+//        longGesture.cancelsTouchesInView = false
+//
+//        tapGesture = UITapGestureRecognizer(context)
+//        tapGesture.cancelsTouchesInView = false
 
-        tapGesture = UITapGestureRecognizer(context)
-        tapGesture.cancelsTouchesInView = false
+//        delegate.addGestureRecognizer(longGesture)
+//        delegate.addGestureRecognizer(tapGesture)
 
-        delegate.addGestureRecognizer(longGesture)
-        delegate.addGestureRecognizer(tapGesture)
+//        tapGesture.actionListener = tapGestureListener
 
-        tapGesture.actionListener = tapGestureListener
+//        delegate.isEnabled = isEnabled
 
-        delegate.isEnabled = isEnabled
-
-        editText.setGestureDelegate(delegate)
+//        editText.setGestureDelegate(delegate)
     }
 
     private fun startInteraction() {
