@@ -1,18 +1,23 @@
-Material Number Sliding Picker
-======================
+# Material Number Sliding Picker (Fork)
 
 A widget that enables the user to select a number from a predefined range.
 Progress value can be changed using the up and down arrows, click and edit the editable text or swiping up/down or left/right.
 
-![Screen shot](./art/video.gif)
+```gradle
+dependencies {
+   implementation 'com.github.guilhe:NumberSlidingPicker:-SNAPSHOT'
+}
+```	
+	
+<img src="./art/video.gif" alt="Screen shot" width="50%"/>
 
-[![Build Status](https://travis-ci.org/sephiroth74/NumberSlidingPicker.svg?branch=master)](https://travis-ci.org/sephiroth74/NumberSlidingPicker)
+[![Build Status](https://travis-ci.org/sephiroth74/NumberSlidingPicker.svg?branch=master)](https://travis-ci.org/sephiroth74/NumberSlidingPicker) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/it.sephiroth.android.library/number-sliding-picker/badge.svg)](https://maven-badges.herokuapp.com/maven-central/it.sephiroth.android.library/number-sliding-picker) [![](https://jitpack.io/v/sephiroth74/NumberSlidingPicker.svg)](https://jitpack.io/#sephiroth74/NumberSlidingPicker)
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/it.sephiroth.android.library/number-sliding-picker/badge.svg)](https://maven-badges.herokuapp.com/maven-central/it.sephiroth.android.library/number-sliding-picker)
-[![](https://jitpack.io/v/sephiroth74/NumberSlidingPicker.svg)](https://jitpack.io/#sephiroth74/NumberSlidingPicker)
+# About this Fork
 
-Installation
-===
+I've forked this project to remove _RxJava_ dependency since we can achieve the same result using coroutines.
+
+# Installation
 
 ## Maven
 
@@ -22,7 +27,7 @@ compile 'it.sephiroth.android.library:number-sliding-picker:**version**'
 	
 ## JitPack
 
-**Step 1.** Add the JitPack repository to your build file:
+### Step 1. Add the JitPack repository to your build file:
 
 ```gradle
 allprojects {
@@ -33,7 +38,7 @@ allprojects {
 }
 ```
 
-**Step 2.** Add the dependency
+### Step 2. Add the dependency
 
 ```gradle
 dependencies {
@@ -43,9 +48,7 @@ dependencies {
 
 Get the latest version  on [JitPack](https://jitpack.io/#sephiroth74/NumberSlidingPicker)	
 
-
-Usage
-===
+# Usage
 
 ```xml
     <it.sephiroth.android.library.numberpicker.NumberPicker
@@ -80,8 +83,7 @@ Usage
         }
 ```
 
-License
-===
+# License
 MIT License
 
 Copyright (c) 2019 Alessandro Crugnola
